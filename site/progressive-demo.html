@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Progressive tabs demo · Manner</title>
+  <style>
+    :root { font-family: ui-sans-serif, system-ui, sans-serif; color: #121a26; background: #fff; }
+    body { margin: 0; padding: 28px; } nav { display: flex; gap: 8px; margin-bottom: 24px; } a { padding: 9px 12px; color: #3157e8; border: 1px solid #dce3ee; border-radius: 8px; text-decoration: none; } [aria-selected="true"] { background: #d7fb68; color: #121a26; border-color: #121a26; font-weight: 800; } [data-panel] { padding: 18px; border-left: 3px solid #3157e8; } [hidden] { display: none; } p { color: #657083; }
+  </style>
+</head>
+<body>
+  <manner-tabs>
+    <nav data-tablist aria-label="Release notes">
+      <a href="#stable" data-tab>Stable</a>
+      <a href="#next" data-tab>Next</a>
+    </nav>
+    <section id="stable" data-panel><h1>Stable HTML</h1><p>This link works before enhancement. After upgrade, it becomes a keyboard-friendly tab.</p></section>
+    <section id="next" data-panel><h1>Next behavior</h1><p>Arrow keys move focus. The URL stays yours; Manner does not invent history semantics.</p></section>
+  </manner-tabs>
+  <script type="module">
+    if (!new URLSearchParams(location.search).has("nojs")) import("./dist/index.js");
+  </script>
+</body>
+</html>
