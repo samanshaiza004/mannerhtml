@@ -1,0 +1,13 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Manner progressive tabs</title>
+<script type="module" src="../dist/index.js"></script>
+<style>[role="tab"][aria-selected="true"] { font-weight: 700; } [role="tabpanel"][hidden] { display: none; }</style>
+<manner-tabs>
+  <nav data-tablist aria-label="Latest information">
+    <a href="#news" data-tab>News</a>
+    <a href="#events" data-tab>Events</a>
+  </nav>
+  <section id="news" data-panel><h1>News</h1><p>Available even before the module loads.</p></section>
+  <section id="events" data-panel><h1>Events</h1><p>Deep-linkable server-rendered content.</p></section>
+</manner-tabs>

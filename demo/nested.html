@@ -1,0 +1,13 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Manner nested tabs</title>
+<script type="module" src="../dist/index.js"></script>
+<manner-tabs>
+  <div data-tablist aria-label="Outer sections"><button type="button" data-tab>Outer</button></div>
+  <section data-panel>
+    <manner-tabs>
+      <div data-tablist aria-label="Inner sections"><button type="button" data-tab>Inner one</button><button type="button" data-tab>Inner two</button></div>
+      <section data-panel>Inner one</section><section data-panel>Inner two</section>
+    </manner-tabs>
+  </section>
+</manner-tabs>
