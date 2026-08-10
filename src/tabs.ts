@@ -24,6 +24,11 @@ interface TabsModel {
   panelIds: string[];
 }
 
+type ModelResult =
+  | { state: "pending" }
+  | { state: "invalid" }
+  | { state: "valid"; model: TabsModel };
+
 const HTMLElementBase: typeof HTMLElement =
   (globalThis as { HTMLElement?: typeof HTMLElement }).HTMLElement ??
   (class {} as typeof HTMLElement);
@@ -37,7 +42,18 @@ function error(host: HTMLElement, message: string): void {
 }
 
 function ownedBy(host: HTMLElement, element: Element): boolean {
-  return element.closest("manner-tabs") === host;
+  let current: Element | null = element;
+  while (current) {
+    if (current === host) return true;
+    const registered = globalThis.customElements?.get(current.localName);
+    if (
+      current instanceof MannerTabs ||
+      registered === MannerTabs ||
+      (registered && registered.prototype instanceof MannerTabs)
+    ) return false;
+    current = current.parentElement;
+  }
+  return false;
 }
 
 function isElement(value: EventTarget | null): value is Element {
@@ -53,6 +69,8 @@ function randomToken(): string {
 export class MannerTabs extends HTMLElementBase {
   #initialized = false;
   #bootObserver: MutationObserver | null = null;
+  #bootTimer: ReturnType<typeof setTimeout> | null = null;
+  #bootController: AbortController | null = null;
   #abortController: AbortController | null = null;
   #tablist!: HTMLElement;
   #tabs: HTMLElement[] = [];
@@ -73,21 +91,34 @@ export class MannerTabs extends HTMLElementBase {
       return;
     }
 
-    if (this.#tryUpgrade()) return;
+    const result = this.#tryUpgrade();
+    if (result.state !== "pending") return;
 
     this.#bootObserver?.disconnect();
+    this.#bootController?.abort();
+    const controller = new AbortController();
+    this.#bootController = controller;
     this.#bootObserver = new MutationObserver(() => {
-      if (this.#tryUpgrade()) {
-        this.#bootObserver?.disconnect();
-        this.#bootObserver = null;
-      }
+      this.#tryUpgrade();
     });
     this.#bootObserver.observe(this, { childList: true, subtree: true });
+    this.#bootTimer = setTimeout(() => {
+      this.#bootTimer = null;
+      this.#tryUpgrade(this.ownerDocument?.readyState !== "loading");
+    }, 0);
+    this.ownerDocument?.addEventListener("DOMContentLoaded", this.#onDOMContentLoaded, {
+      once: true,
+      signal: controller.signal,
+    });
   }
 
   disconnectedCallback(): void {
     this.#bootObserver?.disconnect();
     this.#bootObserver = null;
+    if (this.#bootTimer !== null) clearTimeout(this.#bootTimer);
+    this.#bootTimer = null;
+    this.#bootController?.abort();
+    this.#bootController = null;
     this.#abortController?.abort();
     this.#abortController = null;
   }
@@ -109,16 +140,32 @@ export class MannerTabs extends HTMLElementBase {
 
   refresh(): void {
     const selectedTab = this.#tabs[this.#selectedIndex];
-    const model = this.#buildModel(selectedTab);
-    if (!model) return;
-    this.#commit(model, false);
+    const result = this.#buildModel(selectedTab, true);
+    if (result.state !== "valid") return;
+    this.#commit(result.model, false);
   }
 
-  #tryUpgrade(): boolean {
-    const model = this.#buildModel();
-    if (!model) return false;
-    this.#commit(model, true);
-    return true;
+  #onDOMContentLoaded = (): void => {
+    this.#tryUpgrade(true);
+  };
+
+  #tryUpgrade(finalize = false): ModelResult {
+    const result = this.#buildModel(undefined, finalize);
+    if (result.state === "valid") {
+      this.#commit(result.model, true);
+    } else if (result.state === "invalid") {
+      this.#stopBootstrap();
+    }
+    return result;
+  }
+
+  #stopBootstrap(): void {
+    this.#bootObserver?.disconnect();
+    this.#bootObserver = null;
+    if (this.#bootTimer !== null) clearTimeout(this.#bootTimer);
+    this.#bootTimer = null;
+    this.#bootController?.abort();
+    this.#bootController = null;
   }
 
   #discover<T extends Element>(selector: string): T[] {
@@ -127,27 +174,34 @@ export class MannerTabs extends HTMLElementBase {
     );
   }
 
-  #buildModel(previousTab?: HTMLElement): TabsModel | null {
+  #buildModel(previousTab?: HTMLElement, finalize = false): ModelResult {
     const tablists = this.#discover<HTMLElement>("[data-tablist]");
     const tabs = this.#discover<HTMLElement>("[data-tab]");
     const panels = this.#discover<HTMLElement>("[data-panel]");
 
-    // An empty host can be observed while the parser is still constructing it.
-    // Once any contract node exists, validation errors are definitive.
-    if (tablists.length === 0 && tabs.length === 0 && panels.length === 0) {
-      return null;
+    const invalid = (message: string): ModelResult => {
+      error(this, message);
+      return { state: "invalid" };
+    };
+
+    // A parser can call connectedCallback before all descendants exist. Keep
+    // that state distinct from a malformed, fully constructed instance and
+    // defer the final decision until parsing has left the loading state.
+    if (
+      !finalize &&
+      (this.ownerDocument?.readyState === "loading" ||
+        tablists.length === 0 || tabs.length === 0 || panels.length === 0)
+    ) {
+      return { state: "pending" };
     }
     if (tablists.length !== 1) {
-      error(this, `Expected exactly one owned [data-tablist]; found ${tablists.length}.`);
-      return null;
+      return invalid(`Expected exactly one owned [data-tablist]; found ${tablists.length}.`);
     }
     if (tabs.length === 0) {
-      error(this, "Expected at least one owned [data-tab].");
-      return null;
+      return invalid("Expected at least one owned [data-tab].");
     }
     if (panels.length === 0) {
-      error(this, "Expected at least one owned [data-panel].");
-      return null;
+      return invalid("Expected at least one owned [data-panel].");
     }
 
     const tablist = tablists[0];
@@ -155,71 +209,78 @@ export class MannerTabs extends HTMLElementBase {
       (!tablist.hasAttribute("aria-label") || !tablist.getAttribute("aria-label")) &&
       (!tablist.hasAttribute("aria-labelledby") || !tablist.getAttribute("aria-labelledby"))
     ) {
-      error(this, "The owned tablist requires aria-label or aria-labelledby.");
-      return null;
+      return invalid("The owned tablist requires aria-label or aria-labelledby.");
     }
     if (tablist.hasAttribute("role") && tablist.getAttribute("role") !== "tablist") {
-      error(this, "The tablist has a conflicting authored role.");
-      return null;
+      return invalid("The tablist has a conflicting authored role.");
     }
 
     const allAnchors = tabs.every((tab) => tab.localName === "a");
     const allButtons = tabs.every((tab) => tab.localName === "button");
     if (!allAnchors && !allButtons) {
-      error(this, "Tabs must be all <a> or all <button>; mixed or other elements are invalid.");
-      return null;
+      return invalid("Tabs must be all <a> or all <button>; mixed or other elements are invalid.");
     }
     const profile: Profile = allAnchors ? "progressive" : "application";
     if (profile === "application" && tabs.length !== panels.length) {
-      error(this, `Application tabs require equal tab/panel counts; found ${tabs.length} and ${panels.length}.`);
-      return null;
+      return invalid(`Application tabs require equal tab/panel counts; found ${tabs.length} and ${panels.length}.`);
     }
 
     const activation = this.getAttribute("data-activation") || "auto";
     if (activation !== "auto" && activation !== "manual") {
-      error(this, `Unsupported data-activation value "${activation}".`);
-      return null;
+      return invalid(`Unsupported data-activation value "${activation}".`);
     }
     const dataOrientation = this.getAttribute("data-orientation");
     const configuredOrientation = dataOrientation || tablist.getAttribute("aria-orientation") || "horizontal";
     if (configuredOrientation !== "horizontal" && configuredOrientation !== "vertical") {
-      error(this, `Unsupported data-orientation value "${configuredOrientation}".`);
-      return null;
+      return invalid(`Unsupported data-orientation value "${configuredOrientation}".`);
     }
     const authoredOrientation = tablist.getAttribute("aria-orientation");
     if (authoredOrientation && authoredOrientation !== "horizontal" && authoredOrientation !== "vertical") {
-      error(this, `Unsupported authored aria-orientation value "${authoredOrientation}".`);
-      return null;
+      return invalid(`Unsupported authored aria-orientation value "${authoredOrientation}".`);
     }
     if (dataOrientation && authoredOrientation && authoredOrientation !== dataOrientation) {
-      error(this, "data-orientation and authored aria-orientation disagree.");
-      return null;
+      return invalid("data-orientation and authored aria-orientation disagree.");
     }
     const orientation = (authoredOrientation || configuredOrientation) as Orientation;
 
     for (const tab of tabs) {
       if (tab.hasAttribute("disabled") || tab.getAttribute("aria-disabled") === "true") {
-        error(this, "Disabled tabs are not supported in v0.1.");
-        return null;
+        return invalid("Disabled tabs are not supported in v0.1.");
       }
       if (tab.getAttribute("role") && tab.getAttribute("role") !== "tab") {
-        error(this, "A tab has a conflicting authored role.");
-        return null;
+        return invalid("A tab has a conflicting authored role.");
       }
       const authoredSelected = tab.getAttribute("aria-selected");
       if (authoredSelected && authoredSelected !== "true" && authoredSelected !== "false") {
-        error(this, "aria-selected must be true or false when authored.");
-        return null;
+        return invalid("aria-selected must be true or false when authored.");
       }
     }
     for (const panel of panels) {
       if (panel.getAttribute("role") && panel.getAttribute("role") !== "tabpanel") {
-        error(this, "A panel has a conflicting authored role.");
-        return null;
+        return invalid("A panel has a conflicting authored role.");
       }
       if (panel.hasAttribute("aria-labelledby") && !panel.getAttribute("aria-labelledby")) {
-        error(this, "A panel has an empty authored aria-labelledby.");
-        return null;
+        return invalid("A panel has an empty authored aria-labelledby.");
+      }
+    }
+
+    const relevantIds = new Set<string>();
+    for (const element of [...tabs, ...panels]) {
+      if (element.id) relevantIds.add(element.id);
+      for (const attribute of ["aria-controls", "aria-labelledby"]) {
+        for (const id of (element.getAttribute(attribute) || "").split(/\s+/).filter(Boolean)) {
+          relevantIds.add(id);
+        }
+      }
+    }
+    for (const id of (tablist.getAttribute("aria-labelledby") || "").split(/\s+/).filter(Boolean)) {
+      relevantIds.add(id);
+    }
+    const documentIds = [...(this.ownerDocument?.querySelectorAll<HTMLElement>("[id]") || [])];
+    for (const id of relevantIds) {
+      const matches = documentIds.filter((element) => element.id === id);
+      if (matches.length > 1) {
+        return invalid(`Duplicate authored id "${id}" would make an accessibility relationship ambiguous.`);
       }
     }
 
@@ -232,28 +293,25 @@ export class MannerTabs extends HTMLElementBase {
       if (profile === "progressive") {
         const href = tab.getAttribute("href");
         if (!href || !/^#[^#/?]+$/.test(href)) {
-          error(this, "Progressive tabs require fragment-only href values such as #panel-id.");
-          return null;
+          return invalid("Progressive tabs require fragment-only href values such as #panel-id.");
         }
         const candidate = this.ownerDocument?.getElementById(href.slice(1));
         if (!(candidate instanceof HTMLElement) || !panelSet.has(candidate)) {
-          error(this, `Tab href="${href}" targets a panel outside this tabs instance.`);
-          return null;
+          if (!finalize) return { state: "pending" };
+          return invalid(`Tab href="${href}" targets a panel outside this tabs instance.`);
         }
         panel = candidate;
       } else {
         panel = panels[index];
       }
-      if (!panel) return null;
+      if (!panel) return invalid("A tab could not be paired with a panel.");
       const panelId = this.#stableId(panel, "panel", panel.id);
       const tabId = this.#stableId(tab, "tab", tab.id);
       if (tab.hasAttribute("aria-controls") && tab.getAttribute("aria-controls") !== panelId) {
-        error(this, "An authored aria-controls does not match the associated panel.");
-        return null;
+        return invalid("An authored aria-controls does not match the associated panel.");
       }
       if (panel.hasAttribute("aria-labelledby") && panel.getAttribute("aria-labelledby") !== tabId) {
-        error(this, "An authored aria-labelledby does not match the associated tab.");
-        return null;
+        return invalid("An authored aria-labelledby does not match the associated tab.");
       }
       tabIds[index] = tabId;
       panelIds[index] = panelId;
@@ -265,16 +323,14 @@ export class MannerTabs extends HTMLElementBase {
       return this.ownerDocument?.getElementById(href.slice(1)) as HTMLElement;
     });
     if (new Set(mappedPanels).size !== panels.length || mappedPanels.some((panel) => !panelSet.has(panel))) {
-      error(this, "Every panel must be mapped to exactly one tab.");
-      return null;
+      return invalid("Every panel must be mapped to exactly one tab.");
     }
 
     const explicit = tabs
       .map((tab, index) => (tab.hasAttribute("data-selected") || tab.getAttribute("aria-selected") === "true" ? index : -1))
       .filter((index) => index >= 0);
     if (explicit.length > 1) {
-      error(this, "Only one tab may be explicitly selected.");
-      return null;
+      return invalid("Only one tab may be explicitly selected.");
     }
     let selectedIndex = explicit[0] ?? -1;
     if (selectedIndex < 0 && previousTab) selectedIndex = tabs.indexOf(previousTab);
@@ -283,7 +339,7 @@ export class MannerTabs extends HTMLElementBase {
       selectedIndex = tabs.findIndex((tab) => tab.getAttribute("href") === hash);
     }
     if (selectedIndex < 0) selectedIndex = 0;
-    return { tablist, tabs, panels: mappedPanels, profile, activation: activation as Activation, orientation, selectedIndex, tabIds, panelIds };
+    return { state: "valid", model: { tablist, tabs, panels: mappedPanels, profile, activation: activation as Activation, orientation, selectedIndex, tabIds, panelIds } };
   }
 
   #stableId(element: HTMLElement, kind: "tab" | "panel", authoredId: string | null): string {
@@ -304,8 +360,7 @@ export class MannerTabs extends HTMLElementBase {
   }
 
   #commit(model: TabsModel, initial: boolean): void {
-    this.#bootObserver?.disconnect();
-    this.#bootObserver = null;
+    this.#stopBootstrap();
     this.#tablist = model.tablist;
     this.#tabs = model.tabs;
     this.#panels = model.panels;
