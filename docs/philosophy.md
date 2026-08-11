@@ -1,6 +1,6 @@
 # Philosophy
 
-Manner occupies the narrow gap between what authors can express in semantic HTML and what users need for correct interaction.
+MannerHTML occupies the narrow gap between what authors can express in semantic HTML and what users need for correct interaction.
 
 - Authors own the HTML, content, IDs, and presentation.
 - The browser owns native behavior whenever the platform provides it.

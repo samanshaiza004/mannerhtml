@@ -26,5 +26,5 @@ createServer(async (request, response) => {
     response.end("Not found");
   }
 }).listen(4174, "127.0.0.1", () => {
-  console.log("Manner website at http://127.0.0.1:4174");
+  console.log("MannerHTML website at http://127.0.0.1:4174");
 });

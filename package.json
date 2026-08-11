@@ -1,7 +1,7 @@
 {
-  "name": "manner",
+  "name": "mannerhtml",
   "version": "0.1.0",
-  "description": "A small, framework-independent behavior layer for server-rendered HTML.",
+  "description": "Accessible, framework-independent behavior for author-owned HTML.",
   "license": "MIT",
   "author": "samanshaiza004",
   "type": "module",
@@ -50,10 +50,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/samanshaiza004/manner.git"
+    "url": "https://github.com/samanshaiza004/mannerhtml.git"
   },
-  "homepage": "https://github.com/samanshaiza004/manner#readme",
+  "homepage": "https://samanshaiza004.github.io/mannerhtml/",
   "bugs": {
-    "url": "https://github.com/samanshaiza004/manner/issues"
+    "url": "https://github.com/samanshaiza004/mannerhtml/issues"
   }
 }

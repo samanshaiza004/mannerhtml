@@ -1,13 +1,13 @@
-# Manner
+# MannerHTML
 
 **Accessible behavior for the HTML you already have.**
 
-Manner is a tiny, framework-independent behavior layer for server-rendered HTML. It enhances author-owned light DOM with the interaction behavior HTML does not provide by itself. It does not render, style, or use Shadow DOM.
+MannerHTML is a tiny, framework-independent behavior layer for server-rendered HTML. It enhances author-owned light DOM with the interaction behavior HTML does not provide by itself. It does not render, style, or use Shadow DOM.
 
 ## Tabs
 
 ```html
-<script type="module" src="/manner/dist/index.js"></script>
+<script type="module" src="/mannerhtml/dist/index.js"></script>
 
 <manner-tabs>
   <nav data-tablist aria-label="Sections">
@@ -26,7 +26,7 @@ The default activation mode is automatic. Use `data-activation="manual"` when se
 
 ## Forms
 
-`<manner-form>` coordinates native constraint validation with author-owned error UI. Native validation remains the no-JavaScript fallback; after upgrade, Manner adds `aria-invalid`, `aria-describedby`, error visibility, summary visibility, and first-invalid focus without generating content.
+`<manner-form>` coordinates native constraint validation with author-owned error UI. Native validation remains the no-JavaScript fallback; after upgrade, MannerHTML adds `aria-invalid`, `aria-describedby`, error visibility, summary visibility, and first-invalid focus without generating content.
 
 See the [form validation contract](docs/form-validation-contract.md) for the required markup, API, focus policy, announcements, and grouped-control guidance.
 
@@ -41,11 +41,11 @@ tabs.addEventListener("manner-tabs-change", (event) => {
 });
 ```
 
-Importing the package registers `<manner-tabs>`. Advanced consumers can import `{ MannerTabs }` from `manner/element` and register a different custom-element name themselves.
+Importing `mannerhtml` registers `<manner-tabs>`. Advanced consumers can import `{ MannerTabs }` from `mannerhtml/element` and register a different custom-element name themselves.
 
 ## What it is not
 
-Manner is not a component library, design system, CSS framework, rendering framework, or framework adapter. Before adding behavior, check whether native HTML already solves the problem; see [native alternatives](docs/native-alternatives.md).
+MannerHTML is not a component library, design system, CSS framework, rendering framework, or framework adapter. Before adding behavior, check whether native HTML already solves the problem; see [native alternatives](docs/native-alternatives.md).
 
 ## Status
 

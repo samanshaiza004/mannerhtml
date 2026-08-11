@@ -3,21 +3,21 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Manner installation, markup, API, keyboard behavior, and accessibility documentation.">
-  <title>Docs — Manner</title>
+  <meta name="description" content="MannerHTML installation, markup, API, keyboard behavior, and accessibility documentation.">
+  <title>Docs — MannerHTML</title>
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
-  <div class="utility"><div class="shell utility-inner"><span>manner / v0.1 tabs</span><a href="https://github.com/samanshaiza004/manner">view source ↗</a></div></div>
-  <header class="site-header"><div class="shell nav"><a class="brand" href="./"><span class="brand-mark">M</span><span>Manner</span></a><nav class="nav-links" aria-label="Main navigation"><a href="./">Overview</a><a aria-current="page" href="./docs.html">Docs</a><a href="./demos.html">Demos</a><a class="nav-cta" href="#install">Install</a></nav></div></header>
+  <div class="utility"><div class="shell utility-inner"><span>mannerhtml / v0.1 tabs</span><a href="https://github.com/samanshaiza004/mannerhtml">view source ↗</a></div></div>
+  <header class="site-header"><div class="shell nav"><a class="brand" href="./"><span class="brand-mark">M</span><span>MannerHTML</span></a><nav class="nav-links" aria-label="Main navigation"><a href="./">Overview</a><a aria-current="page" href="./docs.html">Docs</a><a href="./demos.html">Demos</a><a class="nav-cta" href="#install">Install</a></nav></div></header>
   <main>
-    <div class="shell page-hero"><p class="eyebrow">the contract</p><h1>Markup in. Behavior out.</h1><p>Manner is a tiny custom element that upgrades authored tabs. Start with ordinary HTML, then add one module when you want focus management, selection state, and keyboard interaction.</p></div>
+    <div class="shell page-hero"><p class="eyebrow">the contract</p><h1>Markup in. Behavior out.</h1><p>MannerHTML is a tiny custom element layer that upgrades authored tabs and forms. Start with ordinary HTML, then add one module when you want interaction behavior.</p></div>
     <div class="shell section compact docs-layout">
       <nav class="toc" aria-label="On this page"><a href="#install">01 / Install</a><a href="#markup">02 / Markup</a><a href="#api">03 / API</a><a href="#forms">04 / Forms</a><a href="#keyboard">05 / Keyboard</a><a href="#accessibility">06 / Accessibility</a><a href="#when-not">07 / When not to use</a></nav>
       <div>
-        <section class="doc-block" id="install"><p class="eyebrow">01 / install</p><h2>One dependency. One import.</h2><p>Install Manner from npm, then import it once from your application entrypoint. The package has no runtime dependencies.</p><pre class="code-block"><span class="green">npm install manner</span>
+        <section class="doc-block" id="install"><p class="eyebrow">01 / install</p><h2>One dependency. One import.</h2><p>Install MannerHTML from npm, then import it once from your application entrypoint. The package has no runtime dependencies.</p><pre class="code-block"><span class="green">npm install mannerhtml</span>
 
-<span class="cyan">import</span> "manner";</pre><p>The default entrypoint registers <code>&lt;manner-tabs&gt;</code>. To register the same behavior under a custom tag, import the element class:</p><pre class="code-block"><span class="cyan">import</span> { MannerTabs } <span class="cyan">from</span> "manner/element";
+<span class="cyan">import</span> "mannerhtml";</pre><p>The default entrypoint registers <code>&lt;manner-tabs&gt;</code>. To register the same behavior under a custom tag, import the element class:</p><pre class="code-block"><span class="cyan">import</span> { MannerTabs } <span class="cyan">from</span> "mannerhtml/element";
 customElements.define(<span class="green">"my-tabs"</span>, MannerTabs);</pre></section>
         <section class="doc-block" id="markup"><p class="eyebrow">02 / markup</p><h2>Choose the profile that matches the page.</h2><h3>Progressive anchors</h3><p>Use anchors when tabs represent URL-addressable content. Before JavaScript loads, each link still navigates to its panel.</p><pre class="code-block">&lt;<span class="cyan">manner-tabs</span>&gt;
   &lt;nav <span class="green">data-tablist</span> aria-label=<span class="green">"Topics"</span>&gt;
@@ -41,13 +41,13 @@ customElements.define(<span class="green">"my-tabs"</span>, MannerTabs);</pre></
     &lt;input id=<span class="green">"email"</span> type=<span class="green">"email"</span> required&gt;
     &lt;p id=<span class="green">"email-error"</span> <span class="green">data-error-for</span>=<span class="green">"email"</span> hidden&gt;…&lt;/p&gt;
   &lt;/form&gt;
-&lt;/<span class="cyan">manner-form</span>&gt;</pre><p><a class="button secondary" href="https://github.com/samanshaiza004/manner/blob/main/docs/form-validation-contract.md">Read the form contract ↗</a></p></section>
+&lt;/<span class="cyan">manner-form</span>&gt;</pre><p><a class="button secondary" href="https://github.com/samanshaiza004/mannerhtml/blob/main/docs/form-validation-contract.md">Read the form contract ↗</a></p></section>
         <section class="doc-block" id="keyboard"><p class="eyebrow">04 / keyboard</p><h2>Predictable movement.</h2><ul><li>Arrow Right / Left move through horizontal tabs.</li><li>Arrow Down / Up move through vertical tabs.</li><li>Home and End move to the first or last tab.</li><li>Movement wraps at either end.</li><li>Tab exits the tablist; Shift + Tab re-enters it from the previous focusable element.</li><li>In automatic mode, focus selects immediately. In manual mode, Enter or Space commits the focused tab.</li></ul></section>
-        <section class="doc-block" id="accessibility"><p class="eyebrow">05 / accessibility</p><h2>Evidence you can inspect.</h2><p>The release suite covers 45 browser tests across Chromium, Firefox, and WebKit, including focus, activation, nested instances, reconnects, generated IDs, malformed markup, and axe checks on canonical fixtures. ARIA snapshots assert the exposed structure.</p><p>Automated checks are not a substitute for assistive technology testing. The manual matrix for Safari + VoiceOver, Firefox + NVDA, and Chrome + NVDA remains a release gate.</p><a class="button secondary" href="https://github.com/samanshaiza004/manner/blob/main/TESTING.md">Read the testing record ↗</a></section>
-        <section class="doc-block" id="when-not"><p class="eyebrow">06 / when not to use it</p><h2>Use the platform when it already fits.</h2><p>Manner is for tabbed content, not a general-purpose overlay or navigation system.</p><ul><li>Use <code>&lt;details&gt;</code> for a single disclosure.</li><li>Use <code>&lt;dialog&gt;</code> for modal or non-modal dialogs.</li><li>Use native <code>&lt;select&gt;</code> for choosing one option from a list.</li><li>Use links or navigation landmarks for page navigation.</li></ul><p>Popover and Anchor Positioning can solve other UI problems, but they do not automatically create an accessible tab or menu pattern.</p></section>
+        <section class="doc-block" id="accessibility"><p class="eyebrow">05 / accessibility</p><h2>Evidence you can inspect.</h2><p>The release suite covers 75 browser tests across Chromium, Firefox, and WebKit, including focus, activation, nested instances, reconnects, generated IDs, malformed markup, form validation, fieldset groups, and axe checks on canonical fixtures. ARIA snapshots assert the exposed tab structure.</p><p>Automated checks are not a substitute for assistive technology testing. The manual matrix for Safari + VoiceOver, Firefox + NVDA, and Chrome + NVDA remains a release gate.</p><a class="button secondary" href="https://github.com/samanshaiza004/mannerhtml/blob/main/TESTING.md">Read the testing record ↗</a></section>
+        <section class="doc-block" id="when-not"><p class="eyebrow">06 / when not to use it</p><h2>Use the platform when it already fits.</h2><p>MannerHTML is for tabbed content and validation coordination, not a general-purpose overlay or navigation system.</p><ul><li>Use <code>&lt;details&gt;</code> for a single disclosure.</li><li>Use <code>&lt;dialog&gt;</code> for modal or non-modal dialogs.</li><li>Use native <code>&lt;select&gt;</code> for choosing one option from a list.</li><li>Use links or navigation landmarks for page navigation.</li></ul><p>Popover and Anchor Positioning can solve other UI problems, but they do not automatically create an accessible tab or menu pattern.</p></section>
       </div>
     </div>
   </main>
-  <footer class="footer"><div class="shell footer-inner"><span>© 2026 Manner contributors</span><span><a href="./">Overview</a> · <a href="./demos.html">Demos</a> · <a href="https://github.com/samanshaiza004/manner">GitHub</a></span></div></footer>
+  <footer class="footer"><div class="shell footer-inner"><span>© 2026 MannerHTML contributors</span><span><a href="./">Overview</a> · <a href="./demos.html">Demos</a> · <a href="https://github.com/samanshaiza004/mannerhtml">GitHub</a></span></div></footer>
 </body>
 </html>
