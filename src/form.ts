@@ -3,6 +3,7 @@ type FormControl = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | 
 interface FormModel {
   form: HTMLFormElement;
   controls: FormControl[];
+  fieldsets: HTMLFieldSetElement[];
   summaries: HTMLElement[];
   errors: HTMLElement[];
   summaryItems: HTMLElement[];
@@ -59,6 +60,7 @@ export class MannerForm extends HTMLElementBase {
   #abortController: AbortController | null = null;
   #form!: HTMLFormElement;
   #controls: FormControl[] = [];
+  #fieldsets: HTMLFieldSetElement[] = [];
   #summaries: HTMLElement[] = [];
   #errors: HTMLElement[] = [];
   #summaryItems: HTMLElement[] = [];
@@ -151,6 +153,7 @@ export class MannerForm extends HTMLElementBase {
     const controls = [...form.elements]
       .filter((element): element is FormControl => isFormControl(element))
       .filter((element) => element.form === form && ownedBy(this, element));
+    const fieldsets = this.#discover<HTMLFieldSetElement>("fieldset").filter((fieldset) => fieldset.form === form);
     const focusMode = this.getAttribute("data-error-focus") || "first";
     if (focusMode !== "first") return invalid(`Unsupported data-error-focus value "${focusMode}".`);
     for (const control of controls) {
@@ -160,21 +163,26 @@ export class MannerForm extends HTMLElementBase {
       }
     }
     const controlById = new Map<string, FormControl>();
+    const fieldsetById = new Map<string, HTMLFieldSetElement>();
     for (const control of controls) {
       if (control.id && controlById.has(control.id)) return invalid(`Duplicate owned control id "${control.id}".`);
       if (control.id) controlById.set(control.id, control);
     }
+    for (const fieldset of fieldsets) {
+      if (fieldset.id && fieldsetById.has(fieldset.id)) return invalid(`Duplicate owned fieldset id "${fieldset.id}".`);
+      if (fieldset.id) fieldsetById.set(fieldset.id, fieldset);
+    }
     for (const node of errors) {
       const targetId = node.getAttribute("data-error-for") || "";
-      if (!/^\S+$/.test(targetId) || !controlById.has(targetId)) {
-        return invalid(`An error node references missing control "${targetId}".`);
+      if (!/^\S+$/.test(targetId) || (!controlById.has(targetId) && !fieldsetById.has(targetId))) {
+        return invalid(`An error node references missing control or fieldset "${targetId}".`);
       }
       if (!node.id) return invalid("Every [data-error-for] node requires an authored id.");
     }
     for (const node of summaryItems) {
       const targetId = node.getAttribute("data-summary-for") || "";
-      if (!/^\S+$/.test(targetId) || !controlById.has(targetId)) {
-        return invalid(`A summary node references missing control "${targetId}".`);
+      if (!/^\S+$/.test(targetId) || (!controlById.has(targetId) && !fieldsetById.has(targetId))) {
+        return invalid(`A summary node references missing control or fieldset "${targetId}".`);
       }
     }
     const relevantIds = new Set<string>();
@@ -184,6 +192,7 @@ export class MannerForm extends HTMLElementBase {
         relevantIds.add(id);
       }
     }
+    for (const fieldset of fieldsets) if (fieldset.id) relevantIds.add(fieldset.id);
     for (const node of errors) relevantIds.add(node.id);
     const documentIds = [...(this.ownerDocument?.querySelectorAll<HTMLElement>("[id]") || [])];
     for (const id of relevantIds) {
@@ -191,7 +200,7 @@ export class MannerForm extends HTMLElementBase {
         return invalid(`Duplicate authored id "${id}" would make an error relationship ambiguous.`);
       }
     }
-    return { state: "valid", model: { form, controls, summaries, errors, summaryItems } };
+    return { state: "valid", model: { form, controls, fieldsets, summaries, errors, summaryItems } };
   }
 
   #commit(model: FormModel): void {
@@ -204,6 +213,7 @@ export class MannerForm extends HTMLElementBase {
     }
     this.#form = model.form;
     this.#controls = model.controls;
+    this.#fieldsets = model.fieldsets;
     this.#summaries = model.summaries;
     this.#errors = model.errors;
     this.#summaryItems = model.summaryItems;
@@ -252,7 +262,7 @@ export class MannerForm extends HTMLElementBase {
     event.preventDefault();
     this.#syncAll();
     const firstInvalid = this.#controls.find((control) => control.willValidate && !control.validity.valid);
-    firstInvalid?.focus({ preventScroll: true });
+    firstInvalid?.focus();
   };
 
   #onInvalid = (event: Event): void => {
@@ -275,11 +285,11 @@ export class MannerForm extends HTMLElementBase {
     if (!control.willValidate || control.validity.valid) {
       this.#activeInvalid.delete(control);
       this.#restoreControl(control);
-      this.#setPresentation(control.id, false);
+      this.#setPresentation(control, false);
     } else {
       this.#activeInvalid.add(control);
       control.setAttribute("aria-invalid", "true");
-      this.#setPresentation(control.id, true);
+      this.#setPresentation(control, true);
     }
     this.#updateSummary();
   }
@@ -293,15 +303,22 @@ export class MannerForm extends HTMLElementBase {
     else control.removeAttribute("aria-invalid");
   }
 
-  #setPresentation(controlId: string, visible: boolean): void {
-    if (!controlId) return;
-    const errors = this.#errors.filter((node) => node.getAttribute("data-error-for") === controlId);
-    const summaryItems = this.#summaryItems.filter((node) => node.getAttribute("data-summary-for") === controlId);
+  #targetIdsForControl(control: FormControl): string[] {
+    const ids = control.id ? [control.id] : [];
+    const fieldset = control.closest<HTMLFieldSetElement>("fieldset");
+    if (fieldset && this.#fieldsets.includes(fieldset) && fieldset.id) ids.push(fieldset.id);
+    return ids;
+  }
+
+  #setPresentation(control: FormControl, visible: boolean): void {
+    const targetIds = this.#targetIdsForControl(control);
+    if (targetIds.length === 0) return;
+    const errors = this.#errors.filter((node) => targetIds.includes(node.getAttribute("data-error-for") || ""));
+    const summaryItems = this.#summaryItems.filter((node) => targetIds.includes(node.getAttribute("data-summary-for") || ""));
     for (const node of errors) node.hidden = !visible;
     for (const node of summaryItems) node.hidden = !visible;
-    const control = this.#controls.find((candidate) => candidate.id === controlId);
-    const original = control ? this.#originalDescribedBy.get(control) : undefined;
-    if (!control || !original || !visible) return;
+    const original = this.#originalDescribedBy.get(control);
+    if (!original || !visible) return;
     const ids = [original.value, ...errors.map((node) => node.id)].join(" ").split(/\s+/).filter(Boolean);
     control.setAttribute("aria-describedby", [...new Set(ids)].join(" "));
   }
@@ -317,8 +334,8 @@ export class MannerForm extends HTMLElementBase {
   #updateSummary(): void {
     const visibleIds = new Set(
       [...this.#activeInvalid]
-        .filter((control) => control.id && this.#summaryItems.some((node) => node.getAttribute("data-summary-for") === control.id))
-        .map((control) => control.id),
+        .filter((control) => this.#summaryItems.some((node) => this.#targetIdsForControl(control).includes(node.getAttribute("data-summary-for") || "")))
+        .flatMap((control) => this.#targetIdsForControl(control)),
     );
     for (const summary of this.#summaries) summary.hidden = visibleIds.size === 0;
   }

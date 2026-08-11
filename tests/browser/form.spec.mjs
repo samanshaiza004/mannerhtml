@@ -73,6 +73,24 @@ test.describe("manner-form progressive validation", () => {
     await expect(page.locator("#email")).toHaveAttribute("aria-invalid", "true");
   });
 
+  test("fieldset radio groups use the group error relationship", async ({ page }) => {
+    await loadForm(page, `
+      <manner-form>
+        <form>
+          <div data-error-summary aria-live="polite" hidden><ul><li data-summary-for="contact-method" hidden><a href="#contact-method">Choose a contact method</a></li></ul></div>
+          <fieldset id="contact-method"><legend>Preferred contact method</legend><label><input type="radio" name="contact" value="email" required>Email</label><label><input type="radio" name="contact" value="phone">Phone</label></fieldset>
+          <p id="contact-method-error" data-error-for="contact-method" hidden>Choose a contact method.</p>
+          <button type="submit">Send</button>
+        </form>
+      </manner-form>`);
+    await page.locator("button[type=submit]").click();
+    await expect(page.locator("#contact-method-error")).toBeVisible();
+    await expect(page.locator("[data-summary-for=contact-method]")).toBeVisible();
+    await expect(page.locator("input[type=radio]").first()).toHaveAttribute("aria-invalid", "true");
+    await page.locator("input[type=radio]").first().check();
+    await expect(page.locator("#contact-method-error")).toBeHidden();
+  });
+
   test("validate returns validity and authored relationships are restored", async ({ page }) => {
     await loadForm(page);
     const first = await page.locator("manner-form").evaluate((host) => host.validate());

@@ -15,9 +15,9 @@ The repository now includes a Playwright suite with axe-core checks, ARIA snapsh
 npm run test:browser
 ```
 
-The suite covers both tab authoring profiles, keyboard focus and activation, URL fragments, nested/custom element names, lifecycle, refresh, malformed markup, duplicate IDs, and canonical axe fixtures. It also covers `<manner-form>` native fallback, constraint validation, first-invalid focus, authored error and summary coordination, ARIA restoration, refresh/reconnect, custom ownership, malformed relationships, and a canonical axe fixture. CI installs all three browser engines before running it.
+The suite covers both tab authoring profiles, keyboard focus and activation, URL fragments, nested/custom element names, lifecycle, refresh, malformed markup, duplicate IDs, and canonical axe fixtures. It also covers `<manner-form>` native fallback, constraint validation, first-invalid focus and normal scrolling, authored error and summary coordination, ARIA restoration, fieldset radio groups, refresh/reconnect, custom ownership, malformed relationships, and a canonical axe fixture. CI installs all three browser engines before running it.
 
-Automated evidence recorded 2026-08-10: 72 tests passed in Chromium, Firefox, and WebKit with Playwright and axe-core.
+Automated evidence recorded 2026-08-11: 75 tests passed in Chromium, Firefox, and WebKit with Playwright and axe-core.
 
 ## Manual AT evidence matrix
 
