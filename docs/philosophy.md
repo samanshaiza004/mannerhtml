@@ -8,4 +8,4 @@ Manner occupies the narrow gap between what authors can express in semantic HTML
 - Progressive enhancement is a requirement: meaningful HTML remains meaningful before JavaScript.
 - Accessibility claims require interaction tests and assistive-technology evidence, not only ARIA attributes.
 
-The project deliberately has one primitive in v0.1. A small, auditable behavior surface is more valuable than a large component catalog.
+The project deliberately grows one auditable behavior surface at a time. A small, inspectable contract is more valuable than a large component catalog.

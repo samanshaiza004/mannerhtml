@@ -24,6 +24,12 @@ The anchor example remains ordinary, deep-linkable HTML before JavaScript. After
 
 The default activation mode is automatic. Use `data-activation="manual"` when selection should require Enter or Space. Use `data-orientation="vertical"` for vertical arrow behavior.
 
+## Forms
+
+`<manner-form>` coordinates native constraint validation with author-owned error UI. Native validation remains the no-JavaScript fallback; after upgrade, Manner adds `aria-invalid`, `aria-describedby`, error visibility, summary visibility, and first-invalid focus without generating content.
+
+See the [form validation contract](docs/forms.md) for the required markup and API.
+
 ## API
 
 ```js

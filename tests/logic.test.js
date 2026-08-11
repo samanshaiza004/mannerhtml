@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { edgeIndex, nextIndex, previousIndex } from "../dist/logic.js";
-import { MannerTabs } from "../dist/index.js";
+import { MannerForm, MannerTabs } from "../dist/index.js";
 
 test("tab navigation wraps in both directions", () => {
   assert.equal(nextIndex(2, 3), 0);
@@ -13,4 +13,5 @@ test("tab navigation wraps in both directions", () => {
 
 test("the package can be imported without a browser global", () => {
   assert.equal(typeof MannerTabs, "function");
+  assert.equal(typeof MannerForm, "function");
 });
