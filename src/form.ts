@@ -247,6 +247,7 @@ export class MannerForm extends HTMLElementBase {
     this.#form.addEventListener("invalid", this.#onInvalid, { capture: true, signal: controller.signal });
     this.#form.addEventListener("input", this.#onInput, { signal: controller.signal });
     this.#form.addEventListener("change", this.#onInput, { signal: controller.signal });
+    this.#form.addEventListener("reset", this.#onReset, { signal: controller.signal });
   }
 
   #controlFromTarget(target: EventTarget | null): FormControl | null {
@@ -274,6 +275,17 @@ export class MannerForm extends HTMLElementBase {
     const control = this.#controlFromTarget(event.target);
     if (!control) return;
     if (this.#activeInvalid.has(control) || control.validity.valid) this.#syncControl(control);
+  };
+
+  #onReset = (event: Event): void => {
+    // The reset event fires before the controls have been restored. Defer the
+    // cleanup so a reset returns the presentation to its pristine state too.
+    queueMicrotask(() => {
+      if (event.defaultPrevented) return;
+      this.#activeInvalid.clear();
+      this.#hideInactivePresentation();
+      this.#updateSummary();
+    });
   };
 
   #syncAll(): void {

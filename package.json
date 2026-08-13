@@ -32,6 +32,7 @@
     "test:unit": "npm run build && node --test tests/*.test.js",
     "test:browser": "npm run build && playwright test",
     "test": "npm run test:unit && npm run test:browser",
+    "prepare": "npm run build",
     "site:build": "node site/build.mjs",
     "site:dev": "npm run site:build && node site/server.mjs",
     "prepublishOnly": "npm run typecheck && npm run test:unit && npm run test:browser && npm pack --dry-run"

@@ -73,6 +73,28 @@ test.describe("manner-form progressive validation", () => {
     await expect(page.locator("#email")).toHaveAttribute("aria-invalid", "true");
   });
 
+  test("reset clears invalid presentation after controls are restored", async ({ page }) => {
+    await loadForm(page);
+    await page.locator("button[type=submit]").click();
+    await page.locator("form").evaluate((form) => form.reset());
+    await expect(page.locator("#email")).not.toHaveAttribute("aria-invalid");
+    await expect(page.locator("#email")).toHaveAttribute("aria-describedby", "email-hint");
+    await expect(page.locator("#email-error")).toBeHidden();
+    await expect(page.locator("[data-error-summary]")).toBeHidden();
+  });
+
+  test("a canceled reset preserves the current invalid presentation", async ({ page }) => {
+    await loadForm(page);
+    await page.locator("button[type=submit]").click();
+    await page.locator("form").evaluate((form) => {
+      form.addEventListener("reset", (event) => event.preventDefault(), { once: true });
+      form.reset();
+    });
+    await expect(page.locator("#email")).toHaveAttribute("aria-invalid", "true");
+    await expect(page.locator("#email-error")).toBeVisible();
+    await expect(page.locator("[data-error-summary]")).toBeVisible();
+  });
+
   test("fieldset radio groups use the group error relationship", async ({ page }) => {
     await loadForm(page, `
       <manner-form>
