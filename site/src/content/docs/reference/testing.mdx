@@ -1,0 +1,36 @@
+---
+title: Testing evidence
+description: Automated browser coverage and the honest manual assistive-technology status for v0.2.
+---
+
+Automated evidence recorded on August 13, 2026 for v0.2.0: **102 tests passed** in Chromium, Firefox, and WebKit with Playwright and axe-core.
+
+## Automated coverage
+
+The browser suite exercises both tab profiles, actual focus, keyboard activation, URL fragments, nested and custom element names, disconnect/reconnect, `refresh()`, generated and preserved IDs, malformed markup, duplicate IDs, axe checks, and ARIA snapshots.
+
+Form coverage includes native fallback, first-invalid focus with normal scrolling, author-owned errors and summaries, ARIA restoration, fieldset radio groups, custom ownership, lifecycle, malformed relationships, and a canonical axe fixture.
+
+The v0.2.0 suite also covers reset and canceled-reset behavior, first-visible invalid focus, the `manner-form-invalid` event, conditional panel tab stops, authored `tabindex` preservation, disabled controls, and opt-in `hidden="until-found"` behavior.
+
+```sh
+npm run typecheck
+npm run test:unit
+npm run test:browser
+```
+
+## Manual assistive-technology matrix
+
+Automated results do not establish assistive-technology support. These combinations are release evidence only after a person completes and records the pass.
+
+| Platform | Browser | Assistive technology | Status |
+| --- | --- | --- | --- |
+| macOS | Safari | VoiceOver | Unverified |
+| Windows | Firefox | NVDA | Unverified |
+| Windows | Chrome | NVDA | Unverified |
+| iOS | Safari | VoiceOver | Unverified |
+| Android | Chrome | TalkBack | Unverified |
+
+## Release interpretation
+
+The automated suite supports a credible cross-engine implementation claim. It does not yet support a blanket “screen-reader tested” claim. Website and package copy should preserve that distinction until the manual matrix is complete.

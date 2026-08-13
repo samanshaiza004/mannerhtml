@@ -1,0 +1,164 @@
+---
+import heroWoman from "../assets/hero-woman.jpg";
+import promoMan from "../assets/promo-man.jpg";
+import PortalFooter from "../components/PortalFooter.astro";
+import PortalHeader from "../components/PortalHeader.astro";
+import PortalPanel from "../components/PortalPanel.astro";
+import "../styles/portal.css";
+
+const base = import.meta.env.BASE_URL;
+const library = `${base}dist/index.js`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content="MannerHTML adds accessible interaction behavior to author-owned HTML without rendering components or shipping CSS." />
+    <link rel="icon" href={`${base}favicon.svg`} />
+    <title>MannerHTML — Accessible behavior for your HTML</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <div class="portal-shell">
+      <PortalHeader />
+      <main id="main">
+        <section class="hero" aria-labelledby="hero-title">
+          <div class="hero-art">
+            <img src={heroWoman.src} width={heroWoman.width} height={heroWoman.height} alt="Woman in oversized sunglasses and a silver jacket against an electric-blue studio background" />
+            <div class="halftone" aria-hidden="true"></div>
+            <div class="code-window" aria-label="Progressive tabs markup example">
+              <div class="code-tabs" aria-hidden="true"><span>News</span><span>Events</span><span>About</span></div>
+              <pre><code>&lt;manner-tabs&gt;
+  &lt;nav data-tablist&gt;
+    &lt;a href="#news" data-tab&gt;News&lt;/a&gt;
+    …
+  &lt;/nav&gt;
+&lt;/manner-tabs&gt;</code></pre>
+            </div>
+          </div>
+
+          <div class="hero-copy">
+            <p class="eyebrow">HTML, meet good manners.</p>
+            <h1 id="hero-title"><strong>Behavior.</strong><span>Not components.</span><em>The web, enhanced.</em></h1>
+            <p class="hero-lede">MannerHTML adds the interaction HTML does not provide—without taking away your markup, styles, or framework freedom.</p>
+            <ul class="check-list">
+              <li>Framework independent</li>
+              <li>Zero CSS required</li>
+              <li>Progressive enhancement first</li>
+              <li>Accessible by default</li>
+            </ul>
+            <div class="quick-start">
+              <div><strong>Get started in<br /><span>60 seconds</span></strong><span class="play" aria-hidden="true">▶</span></div>
+              <code>npm install mannerhtml</code>
+              <a href={`${base}docs/`}>Quick-start guide →</a>
+            </div>
+          </div>
+
+          <aside class="hero-news" aria-label="Latest release">
+            <div class="burst"><span>v0.2.0</span><strong>OUT NOW!</strong></div>
+            <PortalPanel title="What’s new" moreHref={`${base}reference/api/`} moreLabel="full API">
+              <h3>v0.2.0 hardens the details.</h3>
+              <p>Findable inactive panels, cleaner tab stops, observable invalid forms, and reset-safe error state.</p>
+              <ul>
+                <li>Typed custom elements</li>
+                <li>Usable source maps</li>
+                <li>Install docs included</li>
+              </ul>
+              <a class="arrow-link" href="https://github.com/samanshaiza004/mannerhtml/releases/tag/v0.2.0">Read the release notes</a>
+            </PortalPanel>
+          </aside>
+        </section>
+
+        <div class="module-grid module-grid--top">
+          <PortalPanel title="Why MannerHTML?" class="why-panel">
+            <p class="panel-callout">You write the HTML.<br />We add the behavior.<br />Nothing more.</p>
+            <p>No virtual DOM. No Shadow DOM. No styling opinion. Just standards, keyboard support, and careful ARIA.</p>
+            <hr />
+            <a class="arrow-link" href={`${base}guides/native-html-first/`}>The native-first rule</a>
+            <a class="arrow-link" href={`${base}docs/`}>How enhancement works</a>
+          </PortalPanel>
+
+          <PortalPanel title="Two behaviors" class="behavior-panel">
+            <article>
+              <p class="version">v0.2.0</p>
+              <h3><a href={`${base}components/tabs/`}>Tabs</a></h3>
+              <p>Anchor or button profiles with automatic or manual activation.</p>
+            </article>
+            <article>
+              <h3><a href={`${base}components/forms/`}>Form validation</a></h3>
+              <p>Native constraints coordinated with author-owned errors and summaries.</p>
+            </article>
+          </PortalPanel>
+
+          <PortalPanel title="Live preview" class="preview-panel" moreHref={`${base}demos/`} moreLabel="all demos">
+            <manner-tabs class="mini-tabs">
+              <nav data-tablist aria-label="Preview topics">
+                <a data-tab href="#preview-markup">Markup</a>
+                <a data-tab href="#preview-keyboard">Keys</a>
+                <a data-tab href="#preview-styles">Styles</a>
+              </nav>
+              <section id="preview-markup" data-panel><strong>Keep your elements.</strong><br />MannerHTML only enhances them.</section>
+              <section id="preview-keyboard" data-panel><strong>Arrow keys included.</strong><br />Home, End, wrapping, and focus.</section>
+              <section id="preview-styles" data-panel><strong>Bring your own CSS.</strong><br />There is no component skin to fight.</section>
+            </manner-tabs>
+            <p class="keyboard-hint">Try ← → Home End</p>
+          </PortalPanel>
+
+          <PortalPanel title="Accessibility evidence" class="evidence-panel">
+            <p class="panel-callout">Tested where behavior actually happens.</p>
+            <dl class="stats">
+              <div><dt>102</dt><dd>automated tests</dd></div>
+              <div><dt>3</dt><dd>browser engines</dd></div>
+            </dl>
+            <p>Playwright, axe, and ARIA snapshots cover the canonical fixtures.</p>
+            <p class="status-note"><strong>AT status:</strong> manual matrix is still in progress.</p>
+            <a class="arrow-link" href={`${base}reference/testing/`}>View honest testing evidence</a>
+          </PortalPanel>
+
+          <PortalPanel title="Reference" class="links-panel">
+            <nav aria-label="Reference links">
+              <a href={`${base}docs/`}>Installation</a>
+              <a href={`${base}components/tabs/`}>Tabs contract</a>
+              <a href={`${base}components/forms/`}>Forms contract</a>
+              <a href={`${base}reference/api/`}>Methods & events</a>
+              <a href={`${base}guides/accessibility/`}>Accessibility guide</a>
+              <a href={`${base}reference/testing/`}>Browser support</a>
+            </nav>
+            <a class="big-download" href="https://github.com/samanshaiza004/mannerhtml/archive/refs/tags/v0.2.0.tar.gz"><strong>Download v0.2.0</strong><span>ESM · TypeScript declarations</span><b aria-hidden="true">↓</b></a>
+          </PortalPanel>
+        </div>
+
+        <div class="module-grid module-grid--bottom">
+          <PortalPanel title="Release desk" moreHref="https://github.com/samanshaiza004/mannerhtml/commits/main" moreLabel="commit history">
+            <ol class="release-list">
+              <li><span>◆</span><a href="https://github.com/samanshaiza004/mannerhtml/releases/tag/v0.2.0">v0.2.0 release notes</a><time datetime="2026-08-13">Aug 13</time></li>
+              <li><span>◇</span><a href={`${base}components/forms/`}>Observable, reset-safe form validation</a><time datetime="2026-08-13">Aug 13</time></li>
+              <li><span>○</span><a href={`${base}components/tabs/`}>Findable panels and cleaner tab stops</a><time datetime="2026-08-13">Aug 13</time></li>
+            </ol>
+          </PortalPanel>
+
+          <PortalPanel title="Community">
+            <div class="community-links">
+              <a href="https://github.com/samanshaiza004/mannerhtml/discussions"><strong>GitHub Discussions</strong><span>Ask questions and share field notes.</span></a>
+              <a href="https://github.com/samanshaiza004/mannerhtml/issues"><strong>Issue tracker</strong><span>Report a reproducible behavior bug.</span></a>
+              <a href="https://github.com/samanshaiza004/mannerhtml"><strong>Star the project</strong><span>Follow releases and inspect the source.</span></a>
+            </div>
+          </PortalPanel>
+
+          <aside class="promo" aria-labelledby="promo-title">
+            <img src={promoMan.src} width={promoMan.width} height={promoMan.height} alt="Man in a royal-blue shirt against a bright yellow studio background" />
+            <div class="promo-copy">
+              <h2 id="promo-title">Build accessible.<br />Ship faster.</h2>
+              <p>Learn when native HTML is already the right answer—and when a behavior layer earns its place.</p>
+              <a class="arrow-link" href={`${base}guides/native-html-first/`}>Read the decision guide</a>
+            </div>
+          </aside>
+        </div>
+      </main>
+      <PortalFooter />
+    </div>
+    <script is:inline type="module" src={library}></script>
+  </body>
+</html>

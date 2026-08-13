@@ -1,0 +1,29 @@
+---
+title: Native HTML first
+description: Decide whether your interface needs MannerHTML at all.
+---
+
+The best behavior layer is often no behavior layer. Start by asking whether HTML already expresses the interaction.
+
+| Need | Start with | Add MannerHTML? |
+| --- | --- | --- |
+| Disclosure or accordion | `<details>` and `<summary>` | No |
+| Modal dialog | `<dialog>` | No |
+| Floating disclosure | Popover API | No |
+| Single-choice input | `<select>` or radios | No |
+| One-at-a-time content views | Linked sections | Use tabs when arrow-key tab semantics improve the task |
+| Authored validation summary | Native constraints | Use forms when errors and summary UI need coordination |
+
+## The admission test
+
+A MannerHTML behavior should meet all three conditions:
+
+1. HTML alone does not supply the expected interaction.
+2. The no-JavaScript markup remains meaningful and usable.
+3. The behavior can enhance author-owned light DOM without taking over rendering or styles.
+
+If a pattern fails that test, it does not belong in MannerHTML.
+
+## What MannerHTML is not
+
+It is not a design system, CSS framework, rendering framework, framework adapter, or collection of styled widgets. That boundary is deliberate: behavior can remain portable only when authors retain ownership of presentation and content.

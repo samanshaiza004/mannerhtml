@@ -1,0 +1,78 @@
+---
+title: Tabs
+description: The authoring and interaction contract for MannerHTML tabs.
+---
+
+`<manner-tabs>` enhances one named tablist with its owned tabs and panels. Malformed or ambiguous markup fails without partial enhancement.
+
+## Progressive profile
+
+Use anchors when each tab maps naturally to a fragment. This preserves useful navigation before JavaScript.
+
+```html
+<manner-tabs>
+  <nav data-tablist aria-label="Account">
+    <a data-tab href="#profile">Profile</a>
+    <a data-tab href="#security">Security</a>
+  </nav>
+
+  <section id="profile" data-panel>…</section>
+  <section id="security" data-panel>…</section>
+</manner-tabs>
+```
+
+Every `href` must be a fragment-only URL targeting exactly one owned panel.
+
+## Application profile
+
+Use buttons for in-page application views. Buttons and panels pair by source order and their counts must match.
+
+```html
+<manner-tabs data-activation="manual">
+  <div data-tablist aria-label="Settings">
+    <button data-tab type="button">Profile</button>
+    <button data-tab type="button">Security</button>
+  </div>
+
+  <section data-panel>…</section>
+  <section data-panel>…</section>
+</manner-tabs>
+```
+
+## Interaction
+
+Horizontal tabs use Left Arrow, Right Arrow, Home, and End. Vertical tabs use Up Arrow, Down Arrow, Home, and End. Navigation wraps at either edge.
+
+Automatic activation selects the tab as focus moves. Set `data-activation="manual"` when Enter or Space should perform selection. Set `data-orientation="vertical"` for vertical arrow behavior.
+
+## Selection and IDs
+
+MannerHTML chooses the first tab unless one has `data-selected`, an authored `aria-selected="true"`, or a progressive tab matches the initial URL fragment. It preserves authored IDs and generates stable IDs when needed.
+
+Duplicate authored IDs are rejected because they make `aria-controls` and `aria-labelledby` relationships ambiguous. Nested MannerHTML instances remain isolated from one another.
+
+## Focusable panels
+
+A panel receives `tabindex="0"` only when it does not already contain a focusable descendant. This gives keyboard users a route into plain text while avoiding an extra stop before a panel’s first link or control. Authored `tabindex` values are preserved through `refresh()`.
+
+## Findable inactive content
+
+Set `data-hidden="until-found"` to keep inactive panel text discoverable through find-in-page and fragment navigation in supporting browsers:
+
+```html
+<manner-tabs data-hidden="until-found">…</manner-tabs>
+```
+
+MannerHTML selects the owning tab when the browser dispatches `beforematch`. The default remains ordinary `hidden` for broad compatibility. If your CSS normalizes hidden elements, preserve `until-found` behavior:
+
+```css
+[hidden]:where(:not([hidden="until-found"])) {
+  display: none !important;
+}
+```
+
+## Structural changes
+
+MannerHTML does not observe application mutations after initialization. After deliberately inserting, removing, or reordering tabs or panels, call `refresh()`.
+
+See the [API reference](../../reference/api/) for programmatic selection and the change event.

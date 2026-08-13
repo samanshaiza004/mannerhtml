@@ -2,4 +2,8 @@ node_modules/
 dist/
 test-results/
 website-dist/
+.astro/
+site/public/dist/
+site/.astro/
+site/site/
 .DS_Store

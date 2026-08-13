@@ -1,0 +1,30 @@
+---
+interface Props {
+  name: "home" | "docs" | "tabs" | "forms" | "demos" | "testing" | "github";
+}
+
+const { name } = Astro.props;
+---
+
+<svg class="portal-icon" viewBox="0 0 32 32" aria-hidden="true">
+  {name === "home" && <path d="M4 15.5 16 5l12 10.5M8 14v13h6v-8h4v8h6V14" />}
+  {name === "docs" && <path d="M5 6h9c2 0 3 1 3 3v18c0-2-1-3-3-3H5V6Zm22 0h-9c-1 0-1 1-1 3v18c0-2 1-3 3-3h7V6ZM9 11h4m-4 5h4m8-5h3m-3 5h3" />}
+  {name === "tabs" && <path d="M5 6h22v20H5zM5 12h22M11 6v6m8-6v6M9 17h14m-14 4h10" />}
+  {name === "forms" && <path d="M8 4h13l5 5v19H8zM21 4v6h5M12 15h10m-10 5h10m-10 5h6" />}
+  {name === "demos" && <path d="M5 5h22v22H5zM13 10l9 6-9 6z" />}
+  {name === "testing" && <path d="m17 4 2 6 6 2-6 2-2 6-2-6-6-2 6-2 2-6Zm8 14 1 3 3 1-3 1-1 3-1-3-3-1 3-1 1-3ZM5 20l4 4m0-4-4 4" />}
+  {name === "github" && <path d="M16 4a12 12 0 0 0-4 23v-3c-3 1-4-1-4-1-.5-2-2-2-2-2-1-1 0-1 0-1 1 0 2 2 2 1 2 3 1 4 1 0-1 1-2 1-3-6-1-7-3-7-6 0-2 1-4 2-5 0-1-1-3 0-5 0 0 2 0 5 2a17 17 0 0 1 9 0c3-2 5-2 5-2 1 2 0 4 0 5 1 1 2 3 2 5 0 3-2 5-7 6 1 1 1 2 1 3v5A12 12 0 0 0 16 4Z" />}
+</svg>
+
+<style>
+  .portal-icon {
+    width: 2rem;
+    height: 2rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    flex: 0 0 auto;
+  }
+</style>

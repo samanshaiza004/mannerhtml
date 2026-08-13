@@ -1,0 +1,88 @@
+---
+title: Form validation
+description: Coordinate native constraint validation with author-owned error messages and summaries.
+---
+
+`<manner-form>` uses native `ValidityState` as its source of truth. It coordinates authored errors, summaries, ARIA relationships, and first-invalid focus without generating content.
+
+## Canonical markup
+
+```html
+<manner-form>
+  <form>
+    <div data-error-summary aria-live="polite" hidden tabindex="-1">
+      <h2>Fix these problems</h2>
+      <ul>
+        <li data-summary-for="email" hidden>
+          <a href="#email">Enter a valid email address</a>
+        </li>
+      </ul>
+    </div>
+
+    <label for="email">Email</label>
+    <input id="email" name="email" type="email" required>
+    <p id="email-error" data-error-for="email" hidden>
+      Enter a valid email address.
+    </p>
+
+    <button type="submit">Send</button>
+  </form>
+</manner-form>
+```
+
+Before JavaScript loads, the browser retains native validation. After upgrade, MannerHTML uses `checkValidity()` and synchronizes visible errors, `aria-invalid`, `aria-describedby`, and summary items.
+
+## Focus and the visual viewport
+
+On invalid submission, MannerHTML focuses the first invalid focusable control and allows normal browser scrolling. Do not add `preventScroll: true` around this submit behavior: on a long form it can move a screen reader’s focus while leaving the visual viewport elsewhere.
+
+MannerHTML skips invalid controls that are not visibly rendered and focuses the first visible invalid control. If every invalid control is hidden, it falls back to the first invalid control. If your design moves focus to an error summary instead, make that an explicit application policy, give the summary heading `tabindex="-1"`, and test the complete flow.
+
+## Announce the summary
+
+Merely revealing a summary does not reliably announce it. Because MannerHTML toggles `hidden` on the summary root, `aria-live="polite"` on that root is not a guarantee: some screen readers register live regions only while they are already in the accessibility tree. Focus the summary when it must be read, or keep a separate live region present from first paint and update its text. `role="alert"` can suit a short, non-interactive message, but an assertive live region is usually too disruptive for a list of links.
+
+MannerHTML does not inject a live-region role or announcement copy because the author owns the communication policy and content.
+
+## Radio and checkbox groups
+
+Use native `<fieldset>` and `<legend>` elements. Target a group-level error at the fieldset ID instead of duplicating the relationship across individual choices.
+
+```html
+<fieldset id="contact-method">
+  <legend>Preferred contact method</legend>
+  <label><input type="radio" name="contact" value="email" required> Email</label>
+  <label><input type="radio" name="contact" value="phone"> Phone</label>
+</fieldset>
+<p id="contact-method-error" data-error-for="contact-method" hidden>
+  Choose a contact method.
+</p>
+```
+
+This keeps the group name and error relationship stable across browser differences in radio-group validation.
+
+## Author responsibilities
+
+- Give each `[data-error-for]` node an authored ID.
+- Point each error or summary item to an owned control or fieldset ID.
+- Keep all relationship IDs unique in the document.
+- Author useful error copy; MannerHTML never invents messages.
+- Test focus, viewport movement, and announcements with the assistive technologies you support.
+
+Use `validate()` to synchronize errors programmatically and `refresh()` after deliberate structural changes.
+
+## JavaScript submission
+
+Guard a `fetch` submission with native validity and let MannerHTML own the invalid presentation:
+
+```js
+form.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  if (!form.checkValidity()) return;
+  await fetch("/api/contact", { method: "POST", body: new FormData(form) });
+});
+```
+
+When MannerHTML blocks a submit, it dispatches a bubbling `manner-form-invalid` event. `event.detail.controls` contains the invalid constraint-validatable controls after the error UI has been synchronized. Custom validity rules must run before MannerHTML reads `ValidityState`, so register their `input`, `change`, and `submit` listeners in capture phase.
+
+After `form.reset()`, MannerHTML restores the pristine authored error state. If an author cancels the reset event, the current invalid presentation is preserved.

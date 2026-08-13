@@ -1,0 +1,27 @@
+---
+title: Accessibility
+description: What MannerHTML handles, what authors retain, and what still requires human testing.
+---
+
+MannerHTML treats accessibility as an interaction contract, not a checklist applied after rendering.
+
+## What the library handles
+
+For tabs, the library supplies tab roles and relationships, roving focus, selected state, panel visibility, expected keyboard navigation, and nested-instance isolation.
+
+For forms, it preserves native validity as the source of truth while coordinating invalid state, error descriptions, summary visibility, and focus on failed submission.
+
+## What authors still own
+
+- A useful accessible name for every tablist.
+- Semantic source HTML and readable content without JavaScript.
+- Visible focus styles with sufficient contrast.
+- Error messages that explain how to recover.
+- Live-region policy and summary wording.
+- Product-level keyboard and assistive-technology testing.
+
+## Automated checks are a floor
+
+The repository runs axe and ARIA snapshots in Chromium, Firefox, and WebKit. Those checks catch many structural regressions but cannot establish a good screen-reader experience.
+
+The release gate also calls for Safari with VoiceOver, Firefox with NVDA, and Chrome with NVDA. These manual combinations remain unverified until a person records the results. See [testing evidence](../../reference/testing/) for the current matrix.

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 64" role="img" aria-labelledby="title">
+  <title id="title">MannerHTML</title>
+  <g fill="none" stroke="#0738ee" stroke-linecap="square" stroke-linejoin="miter" stroke-width="7">
+    <path d="m31 15-20 17 20 17M51 15l20 17-20 17M47 7 34 57"/>
+  </g>
+  <text x="85" y="46" fill="#10142b" font-family="Arial, Helvetica, sans-serif" font-size="41" font-weight="800" letter-spacing="-2">MannerHTML</text>
+</svg>

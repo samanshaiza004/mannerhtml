@@ -1,0 +1,92 @@
+---
+title: API reference
+description: Package entry points, attributes, methods, properties, and events.
+---
+
+## Entry points
+
+```js
+import "mannerhtml"; // registers both custom elements
+import { MannerTabs, MannerForm } from "mannerhtml";
+import { MannerTabs } from "mannerhtml/element";
+import { MannerForm } from "mannerhtml/form";
+import { register } from "mannerhtml/register";
+```
+
+Importing the package is safe in server environments where `HTMLElement` and `customElements` do not exist. Registration occurs when the browser APIs are available.
+
+## `<manner-tabs>`
+
+### Attributes
+
+| Attribute | Values | Default |
+| --- | --- | --- |
+| `data-activation` | `auto`, `manual` | `auto` |
+| `data-orientation` | `horizontal`, `vertical` | `horizontal` |
+| `data-hidden` | `hidden`, `until-found` | `hidden` |
+
+### Property and methods
+
+```js
+const tabs = document.querySelector("manner-tabs");
+
+tabs.selectedIndex;      // current zero-based index
+tabs.selectedIndex = 1;  // programmatic selection
+tabs.select(0);          // select by index
+tabs.refresh();          // rebuild after structural changes
+```
+
+`select()` throws `RangeError` for a non-integer or out-of-range index.
+
+### Change event
+
+Every user or programmatic transition dispatches a bubbling `manner-tabs-change` event. Initial normalization does not.
+
+```js
+tabs.addEventListener("manner-tabs-change", (event) => {
+  const { index, tab, panel, source } = event.detail;
+  // source: "keyboard" | "pointer" | "programmatic"
+});
+```
+
+## `<manner-form>`
+
+### Attribute
+
+`data-error-focus="first"` is the only supported focus policy in v0.2 and is also the default.
+
+### Methods
+
+```js
+const formBehavior = document.querySelector("manner-form");
+
+formBehavior.validate(); // returns boolean and synchronizes authored UI
+formBehavior.refresh();  // rebuild after structural changes
+```
+
+### Invalid event
+
+```js
+formBehavior.addEventListener("manner-form-invalid", (event) => {
+  console.log(event.detail.controls);
+});
+```
+
+`manner-form-invalid` bubbles after an invalid submit has been blocked and the authored error presentation has been synchronized. TypeScript consumers can import `FormInvalidDetail` from `mannerhtml`.
+
+### Reset
+
+A completed native `form.reset()` restores the pre-interaction error presentation. A canceled reset leaves the current state intact.
+
+## Custom element names
+
+Subclass the exported class before registering a custom tag name. Ownership discovery recognizes subclasses, so nested custom-name instances remain isolated.
+
+```js
+import { MannerTabs } from "mannerhtml/element";
+
+class ProductTabs extends MannerTabs {}
+customElements.define("product-tabs", ProductTabs);
+```
+
+The auto-registering package entry augments `HTMLElementTagNameMap`, so `querySelector("manner-tabs")` and `createElement("manner-form")` receive the correct DOM types without casts.

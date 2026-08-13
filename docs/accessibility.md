@@ -4,4 +4,4 @@ The tabs primitive follows the WAI-ARIA tabs interaction model while preserving 
 
 Automated accessibility checks are a floor. A release should exercise keyboard-only interaction and record results with Safari + VoiceOver, Firefox + NVDA, and Chrome + NVDA. Mobile screen-reader behavior is explicitly unverified until iOS VoiceOver and Android TalkBack are tested.
 
-Known v0.1 limitations include no disabled tabs, no automatic structural mutation support, no history/hash synchronization after initialization, and no framework-specific adapters.
+Known v0.2 limitations include no disabled tabs, no automatic structural mutation support, no history/hash synchronization after initialization, and no framework-specific adapters.

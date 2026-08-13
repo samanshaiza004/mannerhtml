@@ -40,11 +40,15 @@ The anchor example remains ordinary, deep-linkable HTML before JavaScript. After
 
 The default activation mode is automatic. Use `data-activation="manual"` when selection should require Enter or Space. Use `data-orientation="vertical"` for vertical arrow behavior.
 
+Use `data-hidden="until-found"` to keep inactive panel text available to find-in-page and fragment navigation in supporting browsers. Panels receive a tab stop only when they do not contain a focusable descendant.
+
 ## Forms
 
 `<manner-form>` coordinates native constraint validation with author-owned error UI. Native validation remains the no-JavaScript fallback; after upgrade, MannerHTML adds `aria-invalid`, `aria-describedby`, error visibility, summary visibility, and first-invalid focus without generating content.
 
 See the [form validation contract](docs/form-validation-contract.md) for the required markup, API, focus policy, announcements, and grouped-control guidance.
+
+Invalid submissions dispatch `manner-form-invalid` after error presentation is synchronized. Completed native resets restore the pristine presentation; canceled resets preserve the current state.
 
 ## API
 
@@ -65,4 +69,4 @@ MannerHTML is not a component library, design system, CSS framework, rendering f
 
 ## Status
 
-This is the v0.1 tabs primitive. Disabled tabs, automatic mutation reconciliation, URL history synchronization, async panels, and additional widgets are intentionally out of scope. Browser and assistive-technology evidence is recorded in [TESTING.md](TESTING.md).
+MannerHTML v0.2 includes tabs and form validation. Disabled tabs, automatic mutation reconciliation, URL history synchronization, async panels, and additional widgets are intentionally out of scope. Browser and assistive-technology evidence is recorded in [TESTING.md](TESTING.md).

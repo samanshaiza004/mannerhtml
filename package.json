@@ -1,6 +1,6 @@
 {
   "name": "mannerhtml",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Accessible, framework-independent behavior for author-owned HTML.",
   "license": "MIT",
   "author": "samanshaiza004",
@@ -33,18 +33,24 @@
     "test:browser": "npm run build && playwright test",
     "test": "npm run test:unit && npm run test:browser",
     "prepare": "npm run build",
-    "site:build": "node site/build.mjs",
-    "site:dev": "npm run site:build && node site/server.mjs",
+    "site:prepare": "npm run build && node site/prepare.mjs",
+    "site:build": "npm run site:prepare && astro build --root site",
+    "site:dev": "npm run site:prepare && astro dev --root site",
+    "site:preview": "astro preview --root site",
+    "site:serve": "node site/static-server.mjs",
     "prepublishOnly": "npm run typecheck && npm run test:unit && npm run test:browser && npm pack --dry-run"
   },
   "devDependencies": {
+    "@astrojs/starlight": "^0.41.7",
     "@axe-core/playwright": "^4.10.2",
     "@playwright/test": "^1.52.0",
+    "astro": "^7.2.1",
     "typescript": "^5.2.2"
   },
   "files": [
     "dist",
     "README.md",
+    "CHANGELOG.md",
     "LICENSE",
     "TESTING.md",
     "docs"

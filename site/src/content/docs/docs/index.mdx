@@ -1,0 +1,49 @@
+---
+title: Getting started
+description: Install MannerHTML and enhance author-owned HTML with accessible interaction behavior.
+sidebar:
+  order: 1
+---
+
+MannerHTML is a small, framework-independent behavior layer for server-rendered HTML. It does not render components, ship styles, or hide your markup in Shadow DOM.
+
+## Install
+
+```sh
+npm install mannerhtml
+```
+
+Import the package once in browser code. The import registers `<manner-tabs>` and `<manner-form>`.
+
+```js
+import "mannerhtml";
+```
+
+## Add behavior to real HTML
+
+This example is ordinary linked content before JavaScript loads. After upgrade, it gains tab semantics, keyboard navigation, roving focus, and panel selection.
+
+```html
+<manner-tabs>
+  <nav data-tablist aria-label="Sections">
+    <a data-tab href="#news">News</a>
+    <a data-tab href="#events">Events</a>
+  </nav>
+
+  <section id="news" data-panel>Latest news</section>
+  <section id="events" data-panel>Upcoming events</section>
+</manner-tabs>
+```
+
+MannerHTML owns behavior and accessibility relationships. You retain control of elements, content, classes, and CSS.
+
+## Choose the right path
+
+- Read the [tabs contract](../components/tabs/) for progressive and application profiles.
+- Read the [form validation contract](../components/forms/) when native constraints need authored error UI.
+- Use the [native HTML decision guide](../guides/native-html-first/) before adding either behavior.
+- Try both behaviors in the [live lab](../demos/).
+
+## Browser baseline
+
+MannerHTML targets current evergreen browsers and is tested in Chromium, Firefox, and WebKit. Automated checks are not a substitute for assistive-technology testing; see the [testing evidence](../reference/testing/) for the current manual status.
