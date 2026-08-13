@@ -452,15 +452,20 @@ export class MannerTabs extends HTMLElementBase {
 
   #syncPanelTabStop(panel: HTMLElement): void {
     const focusable = panel.querySelector(
-      "a[href], button, input, select, textarea, [tabindex]:not([tabindex='-1'])",
+      "a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [contenteditable]:not([contenteditable='false']), [tabindex]:not([tabindex='-1'])",
     );
-    if (panel.hasAttribute("tabindex")) {
-      if (this.#libraryPanelTabStops.has(panel)) {
+    if (this.#libraryPanelTabStops.has(panel)) {
+      if (panel.getAttribute("tabindex") !== "0") {
         this.#libraryPanelTabStops.delete(panel);
-        if (focusable) panel.removeAttribute("tabindex");
+        return;
+      }
+      if (focusable) {
+        this.#libraryPanelTabStops.delete(panel);
+        panel.removeAttribute("tabindex");
       }
       return;
     }
+    if (panel.hasAttribute("tabindex")) return;
     if (!focusable) {
       panel.tabIndex = 0;
       this.#libraryPanelTabStops.add(panel);

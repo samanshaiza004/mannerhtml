@@ -92,6 +92,25 @@ test.describe("profiles and selection", () => {
     });
     await expect(page.locator("[data-panel]").first()).not.toHaveAttribute("tabindex");
   });
+
+  test("refresh preserves authored tabindex changes", async ({ page }) => {
+    await loadFixture(page, application);
+    await page.locator("#tabs").evaluate((tabs) => {
+      const panel = tabs.querySelector("[data-panel]");
+      panel.setAttribute("tabindex", "-1");
+      panel.innerHTML = '<a href="/settings">Settings</a>';
+      tabs.refresh();
+    });
+    await expect(page.locator("[data-panel]").first()).toHaveAttribute("tabindex", "-1");
+  });
+
+  test("disabled controls do not suppress a panel tab stop", async ({ page }) => {
+    await loadFixture(page, progressive.replace(
+      '<section id="one" data-panel>One panel</section>',
+      '<section id="one" data-panel><button disabled>Unavailable</button></section>',
+    ));
+    await expect(page.locator("#one")).toHaveAttribute("tabindex", "0");
+  });
 });
 
 test.describe("keyboard and pointer behavior", () => {
