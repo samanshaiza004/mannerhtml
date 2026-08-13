@@ -73,6 +73,25 @@ test.describe("profiles and selection", () => {
     await expect(page.locator("#one")).toHaveAttribute("id", "one");
     await expect(page.locator("[data-tab]").first()).toHaveAttribute("aria-controls", "one");
   });
+
+  test("only panels without focusable content receive a tab stop", async ({ page }) => {
+    await loadFixture(page, progressive.replace(
+      '<section id="one" data-panel>One panel</section>',
+      '<section id="one" data-panel><a href="/events">Event</a></section>',
+    ));
+    await expect(page.locator("#one")).not.toHaveAttribute("tabindex");
+    await expect(page.locator("#two")).toHaveAttribute("tabindex", "0");
+  });
+
+  test("refresh removes only library-owned tab stops", async ({ page }) => {
+    await loadFixture(page, application);
+    await page.locator("#tabs").evaluate((tabs) => {
+      const panel = tabs.querySelector("[data-panel]");
+      panel.innerHTML = '<a href="/settings">Settings</a>';
+      tabs.refresh();
+    });
+    await expect(page.locator("[data-panel]").first()).not.toHaveAttribute("tabindex");
+  });
 });
 
 test.describe("keyboard and pointer behavior", () => {

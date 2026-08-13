@@ -84,6 +84,7 @@ export class MannerTabs extends HTMLElementBase {
   #nextPanelId = 0;
   #tabIds = new WeakMap<HTMLElement, string>();
   #panelIds = new WeakMap<HTMLElement, string>();
+  #libraryPanelTabStops = new WeakSet<HTMLElement>();
 
   connectedCallback(): void {
     if (this.#initialized) {
@@ -380,7 +381,7 @@ export class MannerTabs extends HTMLElementBase {
     this.#panels.forEach((panel, index) => {
       panel.setAttribute("role", "tabpanel");
       panel.setAttribute("aria-labelledby", this.#tabs[index].id);
-      if (!panel.hasAttribute("tabindex")) panel.tabIndex = 0;
+      this.#syncPanelTabStop(panel);
       panel.hidden = index !== model.selectedIndex;
     });
     this.#selectedIndex = model.selectedIndex;
@@ -439,10 +440,30 @@ export class MannerTabs extends HTMLElementBase {
       tab.setAttribute("aria-selected", String(current === index));
       tab.tabIndex = current === index ? 0 : -1;
     });
-    this.#panels.forEach((panel, current) => { panel.hidden = current !== index; });
+    this.#panels.forEach((panel, current) => {
+      this.#syncPanelTabStop(panel);
+      panel.hidden = current !== index;
+    });
     this.dispatchEvent(new CustomEvent<TabsChangeDetail>("manner-tabs-change", {
       bubbles: true,
       detail: { index, tab: this.#tabs[index], panel: this.#panels[index], source },
     }));
+  }
+
+  #syncPanelTabStop(panel: HTMLElement): void {
+    const focusable = panel.querySelector(
+      "a[href], button, input, select, textarea, [tabindex]:not([tabindex='-1'])",
+    );
+    if (panel.hasAttribute("tabindex")) {
+      if (this.#libraryPanelTabStops.has(panel)) {
+        this.#libraryPanelTabStops.delete(panel);
+        if (focusable) panel.removeAttribute("tabindex");
+      }
+      return;
+    }
+    if (!focusable) {
+      panel.tabIndex = 0;
+      this.#libraryPanelTabStops.add(panel);
+    }
   }
 }
