@@ -4,6 +4,22 @@
 
 MannerHTML is a tiny, framework-independent behavior layer for server-rendered HTML. It enhances author-owned light DOM with the interaction behavior HTML does not provide by itself. It does not render, style, or use Shadow DOM.
 
+## Install
+
+Install the published package from npm:
+
+```sh
+npm install mannerhtml
+```
+
+Then import it from your application entry point. The package is dependency-free ESM and registers both elements:
+
+```js
+import "mannerhtml";
+```
+
+To try an unreleased branch directly from GitHub, use `npm install github:samanshaiza004/mannerhtml`. The `prepare` script builds `dist/` automatically for Git installs.
+
 ## Tabs
 
 ```html
