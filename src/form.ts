@@ -9,6 +9,10 @@ interface FormModel {
   summaryItems: HTMLElement[];
 }
 
+export interface FormInvalidDetail {
+  controls: FormControl[];
+}
+
 type ModelResult =
   | { state: "pending" }
   | { state: "invalid" }
@@ -243,7 +247,7 @@ export class MannerForm extends HTMLElementBase {
     if (this.#abortController) return;
     const controller = new AbortController();
     this.#abortController = controller;
-    this.#form.addEventListener("submit", this.#onSubmit, { signal: controller.signal });
+    this.#form.addEventListener("submit", this.#onSubmit, { capture: true, signal: controller.signal });
     this.#form.addEventListener("invalid", this.#onInvalid, { capture: true, signal: controller.signal });
     this.#form.addEventListener("input", this.#onInput, { signal: controller.signal });
     this.#form.addEventListener("change", this.#onInput, { signal: controller.signal });
@@ -263,6 +267,12 @@ export class MannerForm extends HTMLElementBase {
     this.#syncAll();
     const firstInvalid = this.#controls.find((control) => control.willValidate && !control.validity.valid);
     firstInvalid?.focus();
+    this.dispatchEvent(new CustomEvent<FormInvalidDetail>("manner-form-invalid", {
+      bubbles: true,
+      detail: {
+        controls: this.#controls.filter((control) => control.willValidate && !control.validity.valid),
+      },
+    }));
   };
 
   #onInvalid = (event: Event): void => {

@@ -81,6 +81,26 @@ formElement.refresh();  // after deliberate DOM changes
 
 `data-error-focus="first"` is the only supported focus policy. MannerHTML does not automatically focus the summary, generate error text, add a live region, or use `aria-errormessage` as a fundamental relationship. Test the authored summary and focus behavior with the assistive technologies you support.
 
+## JavaScript-submitted forms
+
+For a form submitted with `fetch`, prevent the request when the native constraints are invalid and let MannerHTML own the invalid presentation:
+
+```js
+form.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  if (!form.checkValidity()) return;
+  await fetch("/api/contact", { method: "POST", body: new FormData(form) });
+});
+```
+
+`manner-form-invalid` bubbles from the custom element when MannerHTML blocks an invalid submit. Its `event.detail.controls` array contains the invalid, constraint-validatable controls after presentation has been synchronized. Listen for it when a custom submission flow needs an explicit hook for announcements or scrolling. If JavaScript sets custom validity, update it in capture-phase `input`, `change`, or `submit` listeners so it is current before MannerHTML reads `ValidityState`:
+
+```js
+form.addEventListener("input", syncCustomValidity, { capture: true });
+form.addEventListener("change", syncCustomValidity, { capture: true });
+form.addEventListener("submit", syncCustomValidity, { capture: true });
+```
+
 Malformed or ambiguous relationships fail without partial enhancement. Custom names are supported with a subclass:
 
 ```js
