@@ -277,10 +277,11 @@ export class MannerForm extends HTMLElementBase {
     if (this.#activeInvalid.has(control) || control.validity.valid) this.#syncControl(control);
   };
 
-  #onReset = (): void => {
+  #onReset = (event: Event): void => {
     // The reset event fires before the controls have been restored. Defer the
     // cleanup so a reset returns the presentation to its pristine state too.
     queueMicrotask(() => {
+      if (event.defaultPrevented) return;
       this.#activeInvalid.clear();
       this.#hideInactivePresentation();
       this.#updateSummary();
