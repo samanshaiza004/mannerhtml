@@ -111,6 +111,19 @@ test.describe("profiles and selection", () => {
     ));
     await expect(page.locator("#one")).toHaveAttribute("tabindex", "0");
   });
+
+  test("opt-in until-found panels stay findable and select on beforematch", async ({ page }) => {
+    await loadFixture(page, progressive.replace(
+      '<manner-tabs id="tabs">',
+      '<manner-tabs id="tabs" data-hidden="until-found">',
+    ));
+    await expect(page.locator("#two")).toHaveAttribute("hidden", "until-found");
+    await page.locator("#two").dispatchEvent("beforematch");
+    await expect(page.locator("#tabs")).toHaveJSProperty("selectedIndex", 1);
+    await expect(page.locator("[data-tab]").nth(1)).toHaveAttribute("aria-selected", "true");
+    await expect(page.locator("#two")).not.toHaveAttribute("hidden");
+    await expect(page.locator("#one")).toHaveAttribute("hidden", "until-found");
+  });
 });
 
 test.describe("keyboard and pointer behavior", () => {

@@ -79,6 +79,7 @@ export class MannerTabs extends HTMLElementBase {
   #profile!: Profile;
   #activation!: Activation;
   #orientation!: Orientation;
+  #hiddenMode: "hidden" | "until-found" = "hidden";
   #instanceToken = `manner-${randomToken()}`;
   #nextTabId = 0;
   #nextPanelId = 0;
@@ -230,6 +231,10 @@ export class MannerTabs extends HTMLElementBase {
     if (activation !== "auto" && activation !== "manual") {
       return invalid(`Unsupported data-activation value "${activation}".`);
     }
+    const hiddenMode = this.getAttribute("data-hidden") || "hidden";
+    if (hiddenMode !== "hidden" && hiddenMode !== "until-found") {
+      return invalid(`Unsupported data-hidden value "${hiddenMode}".`);
+    }
     const dataOrientation = this.getAttribute("data-orientation");
     const configuredOrientation = dataOrientation || tablist.getAttribute("aria-orientation") || "horizontal";
     if (configuredOrientation !== "horizontal" && configuredOrientation !== "vertical") {
@@ -368,6 +373,7 @@ export class MannerTabs extends HTMLElementBase {
     this.#profile = model.profile;
     this.#activation = model.activation;
     this.#orientation = model.orientation;
+    this.#hiddenMode = this.getAttribute("data-hidden") === "until-found" ? "until-found" : "hidden";
     this.#tabs.forEach((tab, index) => tab.id = tab.id || model.tabIds[index]);
     this.#panels.forEach((panel, index) => panel.id = panel.id || model.panelIds[index]);
     this.#tablist.setAttribute("role", "tablist");
@@ -382,7 +388,7 @@ export class MannerTabs extends HTMLElementBase {
       panel.setAttribute("role", "tabpanel");
       panel.setAttribute("aria-labelledby", this.#tabs[index].id);
       this.#syncPanelTabStop(panel);
-      panel.hidden = index !== model.selectedIndex;
+      this.#setPanelHidden(panel, index !== model.selectedIndex);
     });
     this.#selectedIndex = model.selectedIndex;
     this.#initialized = true;
@@ -396,6 +402,7 @@ export class MannerTabs extends HTMLElementBase {
     this.#abortController = controller;
     this.addEventListener("click", this.#onClick, { signal: controller.signal });
     this.addEventListener("keydown", this.#onKeyDown, { signal: controller.signal });
+    this.addEventListener("beforematch", this.#onBeforeMatch, { signal: controller.signal });
   }
 
   #tabFromTarget(target: EventTarget | null): HTMLElement | null {
@@ -433,6 +440,11 @@ export class MannerTabs extends HTMLElementBase {
     if (this.#activation === "auto") this.#select(next, "keyboard");
   };
 
+  #onBeforeMatch = (event: Event): void => {
+    const panel = event.target instanceof HTMLElement && this.#panels.includes(event.target) ? event.target : null;
+    if (panel) this.#select(this.#panels.indexOf(panel), "programmatic");
+  };
+
   #select(index: number, source: ChangeSource): void {
     if (index < 0 || index >= this.#tabs.length || index === this.#selectedIndex) return;
     this.#selectedIndex = index;
@@ -442,7 +454,7 @@ export class MannerTabs extends HTMLElementBase {
     });
     this.#panels.forEach((panel, current) => {
       this.#syncPanelTabStop(panel);
-      panel.hidden = current !== index;
+      this.#setPanelHidden(panel, current !== index);
     });
     this.dispatchEvent(new CustomEvent<TabsChangeDetail>("manner-tabs-change", {
       bubbles: true,
@@ -470,5 +482,10 @@ export class MannerTabs extends HTMLElementBase {
       panel.tabIndex = 0;
       this.#libraryPanelTabStops.add(panel);
     }
+  }
+
+  #setPanelHidden(panel: HTMLElement, hidden: boolean): void {
+    if (hidden) panel.setAttribute("hidden", this.#hiddenMode === "until-found" ? "until-found" : "");
+    else panel.removeAttribute("hidden");
   }
 }
