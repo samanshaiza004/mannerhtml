@@ -45,7 +45,7 @@ When a control becomes valid after `input` or `change`, MannerHTML hides the mat
 
 ## Summary announcements
 
-An error summary that only becomes visible is not reliably announced to screen reader users. Add an author-owned announcement mechanism to the summary. Prefer `aria-live="polite"` when the summary contains interactive links:
+An error summary that only becomes visible is not reliably announced to screen reader users. MannerHTML toggles `hidden` on `[data-error-summary]` based on whether it has visible items, so `aria-live` on that same root is not a guarantee: some screen readers register live regions only while they are in the accessibility tree. Add an author-owned announcement mechanism to the summary. Prefer `aria-live="polite"` when the summary contains interactive links, and focus the summary after an invalid submit when it is important that the heading and links are read:
 
 ```html
 <div data-error-summary aria-live="polite" hidden tabindex="-1">
@@ -53,7 +53,7 @@ An error summary that only becomes visible is not reliably announced to screen r
 </div>
 ```
 
-For a short, non-interactive summary message, `role="alert"` is also an option. Do not make an interactive list of error links an assertive alert by default. MannerHTML does not inject `aria-live`, `role="alert"`, or announcement text because the author owns the summary's content and communication policy.
+For a short, non-interactive summary message, `role="alert"` is also an option. Do not make an interactive list of error links an assertive alert by default. For announcement behavior that must work without moving focus, keep a separate author-owned live region in the document from first paint and update its text in the submit handler. MannerHTML does not inject `aria-live`, `role="alert"`, focus changes to the summary, or announcement text because the author owns the summary's content and communication policy.
 
 ## Radio and checkbox groups
 
