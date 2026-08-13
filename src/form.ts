@@ -247,7 +247,7 @@ export class MannerForm extends HTMLElementBase {
     if (this.#abortController) return;
     const controller = new AbortController();
     this.#abortController = controller;
-    this.#form.addEventListener("submit", this.#onSubmit, { capture: true, signal: controller.signal });
+    this.#form.addEventListener("submit", this.#onSubmit, { signal: controller.signal });
     this.#form.addEventListener("invalid", this.#onInvalid, { capture: true, signal: controller.signal });
     this.#form.addEventListener("input", this.#onInput, { signal: controller.signal });
     this.#form.addEventListener("change", this.#onInput, { signal: controller.signal });
