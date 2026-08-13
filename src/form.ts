@@ -9,6 +9,10 @@ interface FormModel {
   summaryItems: HTMLElement[];
 }
 
+export interface FormInvalidDetail {
+  controls: FormControl[];
+}
+
 type ModelResult =
   | { state: "pending" }
   | { state: "invalid" }
@@ -268,6 +272,10 @@ export class MannerForm extends HTMLElementBase {
     const firstInvalid =
       invalidControls.find((control) => control.getClientRects().length > 0) || invalidControls[0];
     firstInvalid?.focus();
+    this.dispatchEvent(new CustomEvent<FormInvalidDetail>("manner-form-invalid", {
+      bubbles: true,
+      detail: { controls: invalidControls },
+    }));
   };
 
   #onInvalid = (event: Event): void => {

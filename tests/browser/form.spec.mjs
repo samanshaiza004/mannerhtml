@@ -95,6 +95,15 @@ test.describe("manner-form progressive validation", () => {
     await expect(page.locator("[data-error-summary]")).toBeVisible();
   });
 
+  test("dispatches invalid controls after a blocked submit", async ({ page }) => {
+    await loadForm(page);
+    const controls = await page.locator("manner-form").evaluate((host) => new Promise((resolve) => {
+      host.addEventListener("manner-form-invalid", (event) => resolve(event.detail.controls.map((control) => control.id)), { once: true });
+      host.querySelector("form").requestSubmit();
+    }));
+    expect(controls).toEqual(["email", "name"]);
+  });
+
   test("focuses the first visible invalid control", async ({ page }) => {
     await loadForm(page, `
       <manner-form>
