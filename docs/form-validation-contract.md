@@ -29,7 +29,7 @@
 
 Before JavaScript loads, the browser's native constraint validation remains in control. After upgrade, MannerHTML sets `form.noValidate = true` for normal submission and uses `form.checkValidity()` and each control's `ValidityState` as the source of truth.
 
-On invalid submission, MannerHTML prevents the submit, synchronizes all invalid controls, and focuses the first invalid focusable control. It deliberately lets focus use the browser's normal scrolling behavior. This keeps the visual viewport aligned with the focused field on long forms; authors should not add `preventScroll: true` to their own submit handlers around MannerHTML.
+On invalid submission, MannerHTML prevents the submit, synchronizes all invalid controls, and focuses the first visible invalid focusable control. If every invalid control is hidden, it falls back to the first invalid control. It deliberately lets focus use the browser's normal scrolling behavior. This keeps the visual viewport aligned with the focused field on long forms; authors should not add `preventScroll: true` to their own submit handlers around MannerHTML.
 
 ## Error relationships
 

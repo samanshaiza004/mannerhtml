@@ -261,7 +261,11 @@ export class MannerForm extends HTMLElementBase {
     }
     event.preventDefault();
     this.#syncAll();
-    const firstInvalid = this.#controls.find((control) => control.willValidate && !control.validity.valid);
+    const invalidControls = this.#controls.filter(
+      (control) => control.willValidate && !control.validity.valid,
+    );
+    const firstInvalid =
+      invalidControls.find((control) => control.getClientRects().length > 0) || invalidControls[0];
     firstInvalid?.focus();
   };
 
