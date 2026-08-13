@@ -95,6 +95,21 @@ test.describe("manner-form progressive validation", () => {
     await expect(page.locator("[data-error-summary]")).toBeVisible();
   });
 
+  test("focuses the first visible invalid control", async ({ page }) => {
+    await loadForm(page, `
+      <manner-form>
+        <form>
+          <div style="display: none"><label for="hidden-name">Hidden</label><input id="hidden-name" required></div>
+          <label for="visible-name">Visible</label><input id="visible-name" required>
+          <p id="visible-name-error" data-error-for="visible-name" hidden>Enter your name.</p>
+          <button type="submit">Send</button>
+        </form>
+      </manner-form>`);
+    await page.locator("button[type=submit]").click();
+    await expect(page.locator("#visible-name")).toBeFocused();
+    await expect(page.locator("#hidden-name")).toHaveAttribute("aria-invalid", "true");
+  });
+
   test("fieldset radio groups use the group error relationship", async ({ page }) => {
     await loadForm(page, `
       <manner-form>
