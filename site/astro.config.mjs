@@ -12,7 +12,7 @@ export default defineConfig({
     starlight({
       title: "MannerHTML Docs",
       description: "Accessible behavior for the HTML you already have.",
-      favicon: "/mannerhtml/favicon.svg",
+      favicon: "/favicon.svg",
       logo: {
         src: "./src/assets/logo.svg",
         alt: "MannerHTML",
@@ -34,7 +34,7 @@ export default defineConfig({
           label: "Start",
           items: [
             { label: "Getting started", slug: "docs" },
-            { label: "Live demos", link: `${base}/demos/` },
+            { label: "Live demos", link: "/demos/" },
           ],
         },
         {
@@ -42,6 +42,7 @@ export default defineConfig({
           items: [
             { label: "Tabs", slug: "components/tabs" },
             { label: "Form validation", slug: "components/forms" },
+            { label: "Carousel", slug: "components/carousel" },
           ],
         },
         {

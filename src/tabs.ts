@@ -1,4 +1,13 @@
 import { edgeIndex, nextIndex, previousIndex } from "./logic.js";
+import {
+  BootstrapController,
+  addIdReferences,
+  describe,
+  discoverOwned,
+  duplicateIdError,
+  ownedBy,
+  reportError,
+} from "./shared.js";
 
 type Profile = "progressive" | "application";
 type Activation = "auto" | "manual";
@@ -33,31 +42,79 @@ const HTMLElementBase: typeof HTMLElement =
   (globalThis as { HTMLElement?: typeof HTMLElement }).HTMLElement ??
   (class {} as typeof HTMLElement);
 
-function describe(host: HTMLElement): string {
-  return `<${host.localName || "manner-tabs"}>`;
-}
-
-function error(host: HTMLElement, message: string): void {
-  console.error(`${describe(host)}: ${message}`, host);
-}
-
-function ownedBy(host: HTMLElement, element: Element): boolean {
-  let current: Element | null = element;
-  while (current) {
-    if (current === host) return true;
-    const registered = globalThis.customElements?.get(current.localName);
-    if (
-      current instanceof MannerTabs ||
-      registered === MannerTabs ||
-      (registered && registered.prototype instanceof MannerTabs)
-    ) return false;
-    current = current.parentElement;
-  }
-  return false;
-}
-
 function isElement(value: EventTarget | null): value is Element {
   return value instanceof Element;
+}
+
+// Candidates for the panel tab-stop heuristic. The question is structural — can
+// a keyboard user already reach something inside this panel with Tab? — and it
+// must stay structural, because #syncPanelTabStop also runs against panels that
+// are currently hidden, where any computed-style check reports nothing at all.
+const FOCUS_CANDIDATES =
+  "a[href], area[href], button, input, select, textarea, summary, iframe, audio[controls], video[controls], [contenteditable], [tabindex]";
+
+function authoredTabIndex(element: Element): number | null {
+  const authored = element.getAttribute("tabindex");
+  if (authored === null) return null;
+  const parsed = Number.parseInt(authored, 10);
+  // An unparseable tabindex is ignored, leaving the element's own behavior.
+  return Number.isNaN(parsed) ? null : parsed;
+}
+
+function isEditable(element: Element): boolean {
+  const authored = element.getAttribute("contenteditable");
+  return authored !== null && authored.toLowerCase() !== "false";
+}
+
+// :disabled carries the full "actually disabled" state, including controls
+// disabled by an ancestor <fieldset disabled>, which the attribute alone misses.
+function isDisabled(element: Element): boolean {
+  return element.matches(":disabled");
+}
+
+function isDetailsSummary(element: Element): boolean {
+  const parent = element.parentElement;
+  if (!parent || parent.localName !== "details") return false;
+  // Only the first summary child of a details element is a focus target.
+  return parent.querySelector(":scope > summary") === element;
+}
+
+function isFocusableByDefault(element: Element): boolean {
+  switch (element.localName) {
+    case "a":
+    case "area":
+      return element.hasAttribute("href");
+    case "button":
+    case "select":
+    case "textarea":
+      return !isDisabled(element);
+    case "input":
+      return !isDisabled(element) && (element.getAttribute("type") || "").toLowerCase() !== "hidden";
+    case "summary":
+      return isDetailsSummary(element);
+    case "iframe":
+      return true;
+    case "audio":
+    case "video":
+      return element.hasAttribute("controls");
+    default:
+      return isEditable(element);
+  }
+}
+
+function isSequentiallyFocusable(element: Element): boolean {
+  const tabIndex = authoredTabIndex(element);
+  // HTML excludes every negative tabindex from sequential focus navigation, not
+  // only -1, and a negative value also opts a natively focusable element out.
+  if (tabIndex !== null) return tabIndex >= 0;
+  return isFocusableByDefault(element);
+}
+
+function containsFocusTarget(panel: HTMLElement): boolean {
+  for (const candidate of panel.querySelectorAll(FOCUS_CANDIDATES)) {
+    if (isSequentiallyFocusable(candidate)) return true;
+  }
+  return false;
 }
 
 function randomToken(): string {
@@ -68,9 +125,7 @@ function randomToken(): string {
 
 export class MannerTabs extends HTMLElementBase {
   #initialized = false;
-  #bootObserver: MutationObserver | null = null;
-  #bootTimer: ReturnType<typeof setTimeout> | null = null;
-  #bootController: AbortController | null = null;
+  #bootstrap = new BootstrapController();
   #abortController: AbortController | null = null;
   #tablist!: HTMLElement;
   #tabs: HTMLElement[] = [];
@@ -96,31 +151,11 @@ export class MannerTabs extends HTMLElementBase {
     const result = this.#tryUpgrade();
     if (result.state !== "pending") return;
 
-    this.#bootObserver?.disconnect();
-    this.#bootController?.abort();
-    const controller = new AbortController();
-    this.#bootController = controller;
-    this.#bootObserver = new MutationObserver(() => {
-      this.#tryUpgrade();
-    });
-    this.#bootObserver.observe(this, { childList: true, subtree: true });
-    this.#bootTimer = setTimeout(() => {
-      this.#bootTimer = null;
-      this.#tryUpgrade(this.ownerDocument?.readyState !== "loading");
-    }, 0);
-    this.ownerDocument?.addEventListener("DOMContentLoaded", this.#onDOMContentLoaded, {
-      once: true,
-      signal: controller.signal,
-    });
+    this.#bootstrap.start(this, (finalize) => this.#tryUpgrade(finalize));
   }
 
   disconnectedCallback(): void {
-    this.#bootObserver?.disconnect();
-    this.#bootObserver = null;
-    if (this.#bootTimer !== null) clearTimeout(this.#bootTimer);
-    this.#bootTimer = null;
-    this.#bootController?.abort();
-    this.#bootController = null;
+    this.#bootstrap.stop();
     this.#abortController?.abort();
     this.#abortController = null;
   }
@@ -135,7 +170,7 @@ export class MannerTabs extends HTMLElementBase {
 
   select(index: number): void {
     if (!Number.isInteger(index) || index < 0 || index >= this.#tabs.length) {
-      throw new RangeError(`${describe(this)}: selectedIndex is out of range`);
+      throw new RangeError(`${describe(this, "manner-tabs")}: selectedIndex is out of range`);
     }
     this.#select(index, "programmatic");
   }
@@ -147,42 +182,23 @@ export class MannerTabs extends HTMLElementBase {
     this.#commit(result.model, false);
   }
 
-  #onDOMContentLoaded = (): void => {
-    this.#tryUpgrade(true);
-  };
-
   #tryUpgrade(finalize = false): ModelResult {
     const result = this.#buildModel(undefined, finalize);
     if (result.state === "valid") {
       this.#commit(result.model, true);
     } else if (result.state === "invalid") {
-      this.#stopBootstrap();
+      this.#bootstrap.stop();
     }
     return result;
   }
 
-  #stopBootstrap(): void {
-    this.#bootObserver?.disconnect();
-    this.#bootObserver = null;
-    if (this.#bootTimer !== null) clearTimeout(this.#bootTimer);
-    this.#bootTimer = null;
-    this.#bootController?.abort();
-    this.#bootController = null;
-  }
-
-  #discover<T extends Element>(selector: string): T[] {
-    return [...this.querySelectorAll<T>(selector)].filter((element) =>
-      ownedBy(this, element),
-    );
-  }
-
   #buildModel(previousTab?: HTMLElement, finalize = false): ModelResult {
-    const tablists = this.#discover<HTMLElement>("[data-tablist]");
-    const tabs = this.#discover<HTMLElement>("[data-tab]");
-    const panels = this.#discover<HTMLElement>("[data-panel]");
+    const tablists = discoverOwned<HTMLElement>(this, "[data-tablist]", MannerTabs);
+    const tabs = discoverOwned<HTMLElement>(this, "[data-tab]", MannerTabs);
+    const panels = discoverOwned<HTMLElement>(this, "[data-panel]", MannerTabs);
 
     const invalid = (message: string): ModelResult => {
-      error(this, message);
+      reportError(this, "manner-tabs", message);
       return { state: "invalid" };
     };
 
@@ -251,7 +267,7 @@ export class MannerTabs extends HTMLElementBase {
 
     for (const tab of tabs) {
       if (tab.hasAttribute("disabled") || tab.getAttribute("aria-disabled") === "true") {
-        return invalid("Disabled tabs are not supported in v0.1.");
+        return invalid("Disabled tabs are not supported.");
       }
       if (tab.getAttribute("role") && tab.getAttribute("role") !== "tab") {
         return invalid("A tab has a conflicting authored role.");
@@ -272,23 +288,11 @@ export class MannerTabs extends HTMLElementBase {
 
     const relevantIds = new Set<string>();
     for (const element of [...tabs, ...panels]) {
-      if (element.id) relevantIds.add(element.id);
-      for (const attribute of ["aria-controls", "aria-labelledby"]) {
-        for (const id of (element.getAttribute(attribute) || "").split(/\s+/).filter(Boolean)) {
-          relevantIds.add(id);
-        }
-      }
+      addIdReferences(relevantIds, element, ["aria-controls", "aria-labelledby"]);
     }
-    for (const id of (tablist.getAttribute("aria-labelledby") || "").split(/\s+/).filter(Boolean)) {
-      relevantIds.add(id);
-    }
-    const documentIds = [...(this.ownerDocument?.querySelectorAll<HTMLElement>("[id]") || [])];
-    for (const id of relevantIds) {
-      const matches = documentIds.filter((element) => element.id === id);
-      if (matches.length > 1) {
-        return invalid(`Duplicate authored id "${id}" would make an accessibility relationship ambiguous.`);
-      }
-    }
+    addIdReferences(relevantIds, tablist, ["aria-labelledby"]);
+    const duplicateError = duplicateIdError(this.ownerDocument, relevantIds);
+    if (duplicateError) return invalid(duplicateError);
 
     const tabIds: string[] = [];
     const panelIds: string[] = [];
@@ -366,7 +370,7 @@ export class MannerTabs extends HTMLElementBase {
   }
 
   #commit(model: TabsModel, initial: boolean): void {
-    this.#stopBootstrap();
+    this.#bootstrap.stop();
     this.#tablist = model.tablist;
     this.#tabs = model.tabs;
     this.#panels = model.panels;
@@ -408,7 +412,7 @@ export class MannerTabs extends HTMLElementBase {
   #tabFromTarget(target: EventTarget | null): HTMLElement | null {
     if (!isElement(target)) return null;
     const tab = target.closest<HTMLElement>("[data-tab]");
-    return tab && this.#tabs.includes(tab) && ownedBy(this, tab) ? tab : null;
+    return tab && this.#tabs.includes(tab) && ownedBy(this, tab, MannerTabs) ? tab : null;
   }
 
   #onClick = (event: MouseEvent): void => {
@@ -463,9 +467,7 @@ export class MannerTabs extends HTMLElementBase {
   }
 
   #syncPanelTabStop(panel: HTMLElement): void {
-    const focusable = panel.querySelector(
-      "a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [contenteditable]:not([contenteditable='false']), [tabindex]:not([tabindex='-1'])",
-    );
+    const focusable = containsFocusTarget(panel);
     if (this.#libraryPanelTabStops.has(panel)) {
       if (panel.getAttribute("tabindex") !== "0") {
         this.#libraryPanelTabStops.delete(panel);

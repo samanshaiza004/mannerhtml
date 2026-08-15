@@ -1,17 +1,21 @@
 ---
 title: Testing evidence
-description: Automated browser coverage and the honest manual assistive-technology status for v0.2.
+description: Automated browser coverage and the manual assistive-technology gate for MannerHTML behaviors.
 ---
 
-Automated evidence recorded on August 13, 2026 for v0.2.0: **102 tests passed** in Chromium, Firefox, and WebKit with Playwright and axe-core.
+Automated evidence recorded on August 14, 2026 for unreleased `main` (v0.2.0 plus the Carousel implementation): **165 tests passed** across Chromium, Firefox, and WebKit with Playwright and axe-core.
 
 ## Automated coverage
 
 The browser suite exercises both tab profiles, actual focus, keyboard activation, URL fragments, nested and custom element names, disconnect/reconnect, `refresh()`, generated and preserved IDs, malformed markup, duplicate IDs, axe checks, and ARIA snapshots.
 
+Carousel coverage includes parser-safe bootstrap initialization, authored initial visibility, manual previous/next actions, finite and looping boundaries, stable focus, action-based change events, refresh precedence, nested ownership, dialog composition, live-region semantics, named slides, malformed controls, IDREF validation, axe, and ARIA snapshots.
+
 Form coverage includes native fallback, first-invalid focus with normal scrolling, author-owned errors and summaries, ARIA restoration, fieldset radio groups, custom ownership, lifecycle, malformed relationships, and a canonical axe fixture.
 
-The v0.2.0 suite also covers reset and canceled-reset behavior, first-visible invalid focus, the `manner-form-invalid` event, conditional panel tab stops, authored `tabindex` preservation, disabled controls, and opt-in `hidden="until-found"` behavior.
+The suite also covers reset and canceled-reset behavior, first-visible invalid focus, the `manner-form-invalid` event, conditional panel tab stops, authored `tabindex` preservation, disabled controls, and opt-in `hidden="until-found"` behavior.
+
+Panel tab-stop coverage includes `<summary>` and `<iframe>` as focus targets, every negative `tabindex` value, hidden inputs, and controls disabled by an ancestor `<fieldset disabled>`.
 
 ```sh
 npm run typecheck
@@ -21,7 +25,7 @@ npm run test:browser
 
 ## Manual assistive-technology matrix
 
-Automated results do not establish assistive-technology support. These combinations are release evidence only after a person completes and records the pass.
+Automated results do not establish assistive-technology support. Carousel is a completion gate only after a person records a pass for slide announcements and stable focus in all three required combinations.
 
 | Platform | Browser | Assistive technology | Status |
 | --- | --- | --- | --- |
@@ -30,6 +34,8 @@ Automated results do not establish assistive-technology support. These combinati
 | Windows | Chrome | NVDA | Unverified |
 | iOS | Safari | VoiceOver | Unverified |
 | Android | Chrome | TalkBack | Unverified |
+
+For the three required Carousel combinations, record a pass only when a named slide change is announced after activating Previous or Next, focus remains on that navigation button, finite boundaries are understandable, and `data-loop` wrapping does not produce duplicate or stale announcements. Until those checks are recorded, Carousel is not a completed release feature.
 
 ## Release interpretation
 

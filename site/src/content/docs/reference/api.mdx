@@ -6,10 +6,11 @@ description: Package entry points, attributes, methods, properties, and events.
 ## Entry points
 
 ```js
-import "mannerhtml"; // registers both custom elements
-import { MannerTabs, MannerForm } from "mannerhtml";
+import "mannerhtml"; // registers all custom elements
+import { MannerTabs, MannerForm, MannerCarousel } from "mannerhtml";
 import { MannerTabs } from "mannerhtml/element";
 import { MannerForm } from "mannerhtml/form";
+import { MannerCarousel } from "mannerhtml/carousel";
 import { register } from "mannerhtml/register";
 ```
 
@@ -78,6 +79,42 @@ formBehavior.addEventListener("manner-form-invalid", (event) => {
 
 A completed native `form.reset()` restores the pre-interaction error presentation. A canceled reset leaves the current state intact.
 
+## `<manner-carousel>`
+
+### Attributes
+
+| Attribute | Values | Default |
+| --- | --- | --- |
+| `data-loop` | presence attribute | finite sequence |
+
+The host requires an accessible name. Its owned `[data-slides]` wrapper requires one or more named `[data-slide]` elements and exactly one native `[data-previous]` and `[data-next]` button, each with `type="button"`.
+
+### Properties and methods
+
+```js
+const carousel = document.querySelector("manner-carousel");
+
+carousel.selectedIndex;      // current zero-based index
+carousel.selectedIndex = 1;
+carousel.select(0);
+carousel.next();
+carousel.previous();
+carousel.refresh();
+```
+
+`select()` throws `RangeError` for a non-integer or out-of-range index. Selection does not move focus.
+
+### Change event
+
+```js
+carousel.addEventListener("manner-carousel-change", (event) => {
+  const { index, slide, source } = event.detail;
+  // source: "programmatic" | "next" | "previous"
+});
+```
+
+The event bubbles after a real selection change. Initial normalization and finite boundary no-ops do not dispatch it. The source names the action, regardless of whether the action originated in a click handler or application code.
+
 ## Custom element names
 
 Subclass the exported class before registering a custom tag name. Ownership discovery recognizes subclasses, so nested custom-name instances remain isolated.
@@ -89,4 +126,4 @@ class ProductTabs extends MannerTabs {}
 customElements.define("product-tabs", ProductTabs);
 ```
 
-The auto-registering package entry augments `HTMLElementTagNameMap`, so `querySelector("manner-tabs")` and `createElement("manner-form")` receive the correct DOM types without casts.
+The auto-registering package entry augments `HTMLElementTagNameMap`, so `querySelector("manner-tabs")`, `querySelector("manner-form")`, and `querySelector("manner-carousel")` receive the correct DOM types without casts.

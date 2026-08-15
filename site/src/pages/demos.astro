@@ -1,7 +1,6 @@
 ---
 import PortalFooter from "../components/PortalFooter.astro";
 import PortalHeader from "../components/PortalHeader.astro";
-import PortalPanel from "../components/PortalPanel.astro";
 import "../styles/portal.css";
 
 const base = import.meta.env.BASE_URL;
@@ -23,13 +22,14 @@ const library = `${base}dist/index.js`;
       <PortalHeader />
       <main id="main" class="demo-page">
         <header class="page-banner">
-          <p class="eyebrow">No mockups here.</p>
+          <p class="eyebrow">No mockups here</p>
           <h1>Live behavior lab</h1>
           <p>Use a mouse, keyboard, or screen reader. Each example below runs the same package code your site would import.</p>
         </header>
 
         <div class="demo-grid">
-          <PortalPanel title="Progressive tabs">
+          <section class="demo-panel">
+            <h2>Progressive tabs</h2>
             <p>These links still navigate to visible sections before JavaScript upgrades them.</p>
             <manner-tabs class="demo-tabs">
               <nav data-tablist aria-label="Project phases">
@@ -41,10 +41,11 @@ const library = `${base}dist/index.js`;
               <section id="build" data-panel><h2>Add behavior</h2><p>Import MannerHTML and keep authoring your own markup.</p></section>
               <section id="verify" data-panel><h2>Test the result</h2><p>Exercise real focus, exposed roles, and the no-JS fallback.</p></section>
             </manner-tabs>
-            <a class="arrow-link" href={`${base}components/tabs/`}>Read the tabs contract</a>
-          </PortalPanel>
+            <p class="keyboard-hint"><a class="arrow-link" href={`${base}components/tabs/`}>Read the tabs contract</a></p>
+          </section>
 
-          <PortalPanel title="Manual application tabs">
+          <section class="demo-panel">
+            <h2>Manual application tabs</h2>
             <p>Arrow keys move focus; Enter or Space changes the selected panel.</p>
             <manner-tabs class="demo-tabs" data-activation="manual">
               <div data-tablist aria-label="Settings sections">
@@ -56,9 +57,29 @@ const library = `${base}dist/index.js`;
               <section data-panel><h2>Privacy</h2><p>Controls for visibility and data sharing.</p></section>
               <section data-panel><h2>Alerts</h2><p>Choose which notifications reach you.</p></section>
             </manner-tabs>
-          </PortalPanel>
+            <p class="keyboard-hint">Try ← → Home End</p>
+          </section>
 
-          <PortalPanel title="Native form validation" class="form-demo-panel">
+          <section class="demo-panel carousel-demo-panel">
+            <h2>Manual item sequence</h2>
+            <p>Previous and Next change the visible item while focus stays on the button. The finite boundary is intentional.</p>
+            <manner-carousel class="demo-carousel" aria-label="Field notes">
+              <div data-slides>
+                <figure data-slide aria-label="River walk, spring"><div class="demo-slide-art" aria-hidden="true">01</div><figcaption>River walk, spring</figcaption></figure>
+                <figure data-slide aria-label="Night market, summer" hidden><div class="demo-slide-art" aria-hidden="true">02</div><figcaption>Night market, summer</figcaption></figure>
+                <figure data-slide aria-label="First snow, winter" hidden><div class="demo-slide-art" aria-hidden="true">03</div><figcaption>First snow, winter</figcaption></figure>
+              </div>
+              <div class="carousel-controls">
+                <button type="button" data-previous>Previous</button>
+                <button type="button" data-next>Next</button>
+              </div>
+            </manner-carousel>
+            <p class="keyboard-hint"><a class="arrow-link" href={`${base}components/carousel/`}>Read the Carousel contract</a></p>
+            <button id="demo-open-gallery" class="submit-button" type="button">Open in dialog</button>
+          </section>
+
+          <section class="demo-panel form-demo-panel">
+            <h2>Native form validation</h2>
             <p>The summary and field message are authored here. MannerHTML coordinates visibility, ARIA, and focus.</p>
             <manner-form>
               <form data-demo-form>
@@ -73,12 +94,25 @@ const library = `${base}dist/index.js`;
                 <p class="success-message" role="status" hidden>Looks good. The demo stopped before sending anything.</p>
               </form>
             </manner-form>
-            <a class="arrow-link" href={`${base}components/forms/`}>Read the form contract</a>
-          </PortalPanel>
+            <p class="keyboard-hint"><a class="arrow-link" href={`${base}components/forms/`}>Read the form contract</a></p>
+          </section>
         </div>
       </main>
       <PortalFooter />
     </div>
+    <dialog id="demo-gallery-dialog" class="demo-dialog">
+      <manner-carousel aria-label="Dialog field notes" data-loop>
+        <div data-slides>
+          <figure data-slide aria-label="Dialog note one"><div class="demo-slide-art" aria-hidden="true">A</div><figcaption>Dialog note one</figcaption></figure>
+          <figure data-slide aria-label="Dialog note two" hidden><div class="demo-slide-art" aria-hidden="true">B</div><figcaption>Dialog note two</figcaption></figure>
+        </div>
+        <div class="carousel-controls">
+          <button type="button" data-previous>Previous</button>
+          <button type="button" data-next>Next</button>
+        </div>
+      </manner-carousel>
+      <form method="dialog"><button class="submit-button" type="submit">Close</button></form>
+    </dialog>
     <script is:inline type="module" src={library}></script>
     <script is:inline>
       document.querySelectorAll("[data-demo-form]").forEach((form) => {
@@ -88,6 +122,9 @@ const library = `${base}dist/index.js`;
           form.querySelector(".success-message").hidden = false;
         });
       });
+      const opener = document.querySelector("#demo-open-gallery");
+      const gallery = document.querySelector("#demo-gallery-dialog");
+      opener?.addEventListener("click", () => gallery?.showModal());
     </script>
   </body>
 </html>

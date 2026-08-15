@@ -7,3 +7,4 @@ site/public/dist/
 site/.astro/
 site/site/
 .DS_Store
+.claude/

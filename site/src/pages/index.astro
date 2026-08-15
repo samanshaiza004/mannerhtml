@@ -3,7 +3,6 @@ import heroWoman from "../assets/hero-woman.jpg";
 import promoMan from "../assets/promo-man.jpg";
 import PortalFooter from "../components/PortalFooter.astro";
 import PortalHeader from "../components/PortalHeader.astro";
-import PortalPanel from "../components/PortalPanel.astro";
 import "../styles/portal.css";
 
 const base = import.meta.env.BASE_URL;
@@ -25,140 +24,195 @@ const library = `${base}dist/index.js`;
       <PortalHeader />
       <main id="main">
         <section class="hero" aria-labelledby="hero-title">
-          <div class="hero-art">
-            <img src={heroWoman.src} width={heroWoman.width} height={heroWoman.height} alt="Woman in oversized sunglasses and a silver jacket against an electric-blue studio background" />
-            <div class="halftone" aria-hidden="true"></div>
-            <div class="code-window" aria-label="Progressive tabs markup example">
-              <div class="code-tabs" aria-hidden="true"><span>News</span><span>Events</span><span>About</span></div>
-              <pre><code>&lt;manner-tabs&gt;
-  &lt;nav data-tablist&gt;
-    &lt;a href="#news" data-tab&gt;News&lt;/a&gt;
-    …
-  &lt;/nav&gt;
-&lt;/manner-tabs&gt;</code></pre>
+          <img class="hero-photo" src={heroWoman.src} width={heroWoman.width} height={heroWoman.height} alt="Woman in oversized sunglasses and a silver jacket against an electric-blue studio background" />
+          <div class="halftone" aria-hidden="true"></div>
+          <div class="hero-block">
+            <div class="hero-copy">
+              <p class="eyebrow">HTML, meet good manners</p>
+              <h1 id="hero-title"><span>write the markup.</span><strong>keep the behavior.</strong></h1>
+              <p class="hero-lede">MannerHTML adds the interaction HTML does not provide, without taking away your markup, your styles, or your framework.</p>
             </div>
+            <aside class="hero-news" aria-label="Latest release">
+              <p class="hero-news-version">v0.2.0</p>
+              <p><strong>Out now:</strong> findable inactive panels, cleaner tab stops, and reset-safe form errors.</p>
+              <a href="https://github.com/samanshaiza004/mannerhtml/releases/tag/v0.2.0">Read the release note ›</a>
+            </aside>
           </div>
-
-          <div class="hero-copy">
-            <p class="eyebrow">HTML, meet good manners.</p>
-            <h1 id="hero-title"><strong>Behavior.</strong><span>Not components.</span><em>The web, enhanced.</em></h1>
-            <p class="hero-lede">MannerHTML adds the interaction HTML does not provide—without taking away your markup, styles, or framework freedom.</p>
-            <ul class="check-list">
-              <li>Framework independent</li>
-              <li>Zero CSS required</li>
-              <li>Progressive enhancement first</li>
-              <li>Accessible by default</li>
-            </ul>
-            <div class="quick-start">
-              <div><strong>Get started in<br /><span>60 seconds</span></strong><span class="play" aria-hidden="true">▶</span></div>
-              <code>npm install mannerhtml</code>
-              <a href={`${base}docs/`}>Quick-start guide →</a>
-            </div>
-          </div>
-
-          <aside class="hero-news" aria-label="Latest release">
-            <div class="burst"><span>v0.2.0</span><strong>OUT NOW!</strong></div>
-            <PortalPanel title="What’s new" moreHref={`${base}reference/api/`} moreLabel="full API">
-              <h3>v0.2.0 hardens the details.</h3>
-              <p>Findable inactive panels, cleaner tab stops, observable invalid forms, and reset-safe error state.</p>
-              <ul>
-                <li>Typed custom elements</li>
-                <li>Usable source maps</li>
-                <li>Install docs included</li>
-              </ul>
-              <a class="arrow-link" href="https://github.com/samanshaiza004/mannerhtml/releases/tag/v0.2.0">Read the release notes</a>
-            </PortalPanel>
-          </aside>
         </section>
 
-        <div class="module-grid module-grid--top">
-          <PortalPanel title="Why MannerHTML?" class="why-panel">
-            <p class="panel-callout">You write the HTML.<br />We add the behavior.<br />Nothing more.</p>
-            <p>No virtual DOM. No Shadow DOM. No styling opinion. Just standards, keyboard support, and careful ARIA.</p>
-            <hr />
-            <a class="arrow-link" href={`${base}guides/native-html-first/`}>The native-first rule</a>
-            <a class="arrow-link" href={`${base}docs/`}>How enhancement works</a>
-          </PortalPanel>
+        <div class="tab-row">
+          <section class="tab-card">
+            <h2>Start</h2>
+            <p class="card-eyebrow">manner / new user</p>
+            <img class="card-shot" src={heroWoman.src} alt="" />
+            <p class="card-lead"><a href={`${base}docs/`}>Add behavior in one line</a></p>
+            <p>Install the module, import it once, and the elements you already authored start behaving.</p>
+            <ul class="card-links">
+              <li><a href={`${base}docs/`}>Install the module</a></li>
+              <li><a href={`${base}docs/`}>Quick start</a></li>
+              <li><a href={`${base}demos/`}>Run the live demos</a></li>
+              <li><a href={`${base}reference/testing/`}>Browser support</a></li>
+            </ul>
+            <p class="card-foot">npm | ESM | TypeScript</p>
+          </section>
 
-          <PortalPanel title="Two behaviors" class="behavior-panel">
-            <article>
-              <p class="version">v0.2.0</p>
-              <h3><a href={`${base}components/tabs/`}>Tabs</a></h3>
-              <p>Anchor or button profiles with automatic or manual activation.</p>
-            </article>
-            <article>
-              <h3><a href={`${base}components/forms/`}>Form validation</a></h3>
-              <p>Native constraints coordinated with author-owned errors and summaries.</p>
-            </article>
-          </PortalPanel>
+          <section class="tab-card">
+            <h2>Build</h2>
+            <p class="card-eyebrow">author / markup</p>
+            <div class="card-diagram" aria-hidden="true">
+              <img src={heroWoman.src} alt="" />
+              <p><span>HTML</span><b>→</b><span>MANNER</span><b>→</b><span>ARIA</span></p>
+            </div>
+            <p class="card-lead"><a href={`${base}components/tabs/`}>Describe meaning, not widgets</a></p>
+            <p>You keep the elements and the classes. MannerHTML wires roles, keyboard, and focus around them.</p>
+            <ul class="card-links">
+              <li><a href={`${base}components/tabs/`}>Tabs contract</a></li>
+              <li><a href={`${base}components/forms/`}>Form validation</a></li>
+              <li><a href={`${base}reference/api/`}>Methods and events</a></li>
+              <li><a href={`${base}guides/native-html-first/`}>Native HTML first</a></li>
+            </ul>
+            <p class="card-foot">custom elements | no shadow DOM</p>
+          </section>
 
-          <PortalPanel title="Live preview" class="preview-panel" moreHref={`${base}demos/`} moreLabel="all demos">
-            <manner-tabs class="mini-tabs">
-              <nav data-tablist aria-label="Preview topics">
-                <a data-tab href="#preview-markup">Markup</a>
-                <a data-tab href="#preview-keyboard">Keys</a>
-                <a data-tab href="#preview-styles">Styles</a>
-              </nav>
-              <section id="preview-markup" data-panel><strong>Keep your elements.</strong><br />MannerHTML only enhances them.</section>
-              <section id="preview-keyboard" data-panel><strong>Arrow keys included.</strong><br />Home, End, wrapping, and focus.</section>
-              <section id="preview-styles" data-panel><strong>Bring your own CSS.</strong><br />There is no component skin to fight.</section>
-            </manner-tabs>
-            <p class="keyboard-hint">Try ← → Home End</p>
-          </PortalPanel>
-
-          <PortalPanel title="Accessibility evidence" class="evidence-panel">
-            <p class="panel-callout">Tested where behavior actually happens.</p>
-            <dl class="stats">
-              <div><dt>102</dt><dd>automated tests</dd></div>
-              <div><dt>3</dt><dd>browser engines</dd></div>
-            </dl>
-            <p>Playwright, axe, and ARIA snapshots cover the canonical fixtures.</p>
-            <p class="status-note"><strong>AT status:</strong> manual matrix is still in progress.</p>
-            <a class="arrow-link" href={`${base}reference/testing/`}>View honest testing evidence</a>
-          </PortalPanel>
-
-          <PortalPanel title="Reference" class="links-panel">
-            <nav aria-label="Reference links">
-              <a href={`${base}docs/`}>Installation</a>
-              <a href={`${base}components/tabs/`}>Tabs contract</a>
-              <a href={`${base}components/forms/`}>Forms contract</a>
-              <a href={`${base}reference/api/`}>Methods & events</a>
-              <a href={`${base}guides/accessibility/`}>Accessibility guide</a>
-              <a href={`${base}reference/testing/`}>Browser support</a>
-            </nav>
-            <a class="big-download" href="https://github.com/samanshaiza004/mannerhtml/archive/refs/tags/v0.2.0.tar.gz"><strong>Download v0.2.0</strong><span>ESM · TypeScript declarations</span><b aria-hidden="true">↓</b></a>
-          </PortalPanel>
+          <section class="tab-card">
+            <h2>Understand</h2>
+            <p class="card-eyebrow">access / evidence</p>
+            <img class="card-shot card-shot--alt" src={promoMan.src} alt="" />
+            <p class="card-lead"><a href={`${base}guides/accessibility/`}>Accessible by construction</a></p>
+            <p>Real focus moves, exposed roles, and a no-JavaScript fallback that still navigates.</p>
+            <ul class="card-links">
+              <li><a href={`${base}guides/accessibility/`}>Accessibility guide</a></li>
+              <li><a href={`${base}reference/testing/`}>Testing evidence</a></li>
+              <li><a href={`${base}guides/native-html-first/`}>When to skip the layer</a></li>
+              <li><a href="https://github.com/samanshaiza004/mannerhtml/issues">Report a behavior bug</a></li>
+            </ul>
+            <p class="card-foot">117 tests | 3 engines</p>
+          </section>
         </div>
 
-        <div class="module-grid module-grid--bottom">
-          <PortalPanel title="Release desk" moreHref="https://github.com/samanshaiza004/mannerhtml/commits/main" moreLabel="commit history">
-            <ol class="release-list">
-              <li><span>◆</span><a href="https://github.com/samanshaiza004/mannerhtml/releases/tag/v0.2.0">v0.2.0 release notes</a><time datetime="2026-08-13">Aug 13</time></li>
-              <li><span>◇</span><a href={`${base}components/forms/`}>Observable, reset-safe form validation</a><time datetime="2026-08-13">Aug 13</time></li>
-              <li><span>○</span><a href={`${base}components/tabs/`}>Findable panels and cleaner tab stops</a><time datetime="2026-08-13">Aug 13</time></li>
-            </ol>
-          </PortalPanel>
-
-          <PortalPanel title="Community">
-            <div class="community-links">
-              <a href="https://github.com/samanshaiza004/mannerhtml/discussions"><strong>GitHub Discussions</strong><span>Ask questions and share field notes.</span></a>
-              <a href="https://github.com/samanshaiza004/mannerhtml/issues"><strong>Issue tracker</strong><span>Report a reproducible behavior bug.</span></a>
-              <a href="https://github.com/samanshaiza004/mannerhtml"><strong>Star the project</strong><span>Follow releases and inspect the source.</span></a>
+        <section class="download-strip" aria-labelledby="download-title">
+          <div class="download-main">
+            <h2 id="download-title">Download</h2>
+            <p class="card-eyebrow">latest / release</p>
+            <div class="install-line">
+              <code id="install-command">npm install mannerhtml</code>
+              <button class="copy-button" type="button" data-copy-for="install-command" hidden>COPY</button>
             </div>
-          </PortalPanel>
+            <p>One package, two behaviors, no stylesheet. Types and source maps ship with the build.</p>
+          </div>
+          <div class="download-links">
+            <ul class="card-links">
+              <li><a href="https://www.npmjs.com/package/mannerhtml">Package on npm</a></li>
+              <li><a href="https://github.com/samanshaiza004/mannerhtml/archive/refs/tags/v0.2.0.tar.gz">Source archive</a></li>
+            </ul>
+            <ul class="card-links">
+              <li><a href="https://github.com/samanshaiza004/mannerhtml/releases/tag/v0.2.0">Release notes</a></li>
+              <li><a href="https://github.com/samanshaiza004/mannerhtml/blob/main/LICENSE">MIT license</a></li>
+            </ul>
+          </div>
+          <p class="card-foot">developer preview / small and deliberate surface</p>
+        </section>
 
+        <div class="feature-row">
+          <section class="feature feature--blue">
+            <p class="feature-tag">01 / why manner</p>
+            <h2>You write the HTML.</h2>
+            <p>No virtual DOM, no shadow DOM, no styling opinion. Just standards, keyboard support, and careful ARIA around the markup you already ship.</p>
+            <a class="arrow-link" href={`${base}docs/`}>How enhancement works</a>
+          </section>
+
+          <section class="feature feature--navy">
+            <p class="feature-tag">02 / native by default</p>
+            <h2>Not every widget needs JS.</h2>
+            <p>Details, dialog, popover, and select already carry behavior. MannerHTML is for the interactions HTML genuinely leaves to you.</p>
+            <a class="arrow-link" href={`${base}guides/native-html-first/`}>See the decision table</a>
+          </section>
+
+          <section class="feature feature--sand">
+            <p class="feature-tag">03 / small surface</p>
+            <h2>Two behaviors on purpose.</h2>
+            <p><code>manner-tabs</code> and <code>manner-form</code> are the whole library. Layout, theming, and structure stay deliberately unclaimed.</p>
+            <a class="arrow-link" href={`${base}reference/api/`}>Read the API reference</a>
+          </section>
+        </div>
+
+        <div class="promo-row">
           <aside class="promo" aria-labelledby="promo-title">
             <img src={promoMan.src} width={promoMan.width} height={promoMan.height} alt="Man in a royal-blue shirt against a bright yellow studio background" />
             <div class="promo-copy">
-              <h2 id="promo-title">Build accessible.<br />Ship faster.</h2>
-              <p>Learn when native HTML is already the right answer—and when a behavior layer earns its place.</p>
-              <a class="arrow-link" href={`${base}guides/native-html-first/`}>Read the decision guide</a>
+              <h2 id="promo-title">Start with the docs.</h2>
+              <p>Install the package, enhance one set of tabs, then read the guide for when native HTML is already the answer.</p>
+              <a class="promo-button" href={`${base}docs/`}>OPEN GUIDE ›</a>
             </div>
           </aside>
+
+          <section class="wire" aria-labelledby="wire-title">
+            <h2 id="wire-title">Project wire</h2>
+            <ol>
+              <li>
+                <span class="wire-badge wire-badge--now">NOW</span>
+                <p>v0.2.0 hardens the details: findable inactive panels, cleaner tab stops, and observable invalid forms. <a href="https://github.com/samanshaiza004/mannerhtml/releases/tag/v0.2.0">Release note ›</a></p>
+              </li>
+              <li>
+                <span class="wire-badge wire-badge--built">BUILT</span>
+                <p>Tabs and form validation, both exercised in Chromium, Firefox, and WebKit. <a href={`${base}components/tabs/`}>Behaviors ›</a></p>
+              </li>
+              <li>
+                <span class="wire-badge wire-badge--open">OPEN</span>
+                <p>The manual screen-reader matrix is still in progress and is reported honestly. <a href={`${base}reference/testing/`}>Evidence ›</a></p>
+              </li>
+            </ol>
+            <p class="card-foot">pre-1.0 / semantic versioning starts at the first stable release</p>
+          </section>
+        </div>
+
+        <ul class="spec-strip">
+          <li><b>Version:</b> 0.2.0</li>
+          <li><b>Module:</b> ESM</li>
+          <li><b>Types:</b> included</li>
+          <li><b>Tests:</b> 117</li>
+          <li><b>Engines:</b> 3</li>
+          <li><b>License:</b> MIT</li>
+        </ul>
+
+        <div class="link-columns">
+          <nav aria-labelledby="col-new">
+            <h2 id="col-new"><b>New user</b> start here</h2>
+            <ul>
+              <li><a href={`${base}docs/`}>Installation</a></li>
+              <li><a href={`${base}docs/`}>Quick start</a></li>
+              <li><a href={`${base}demos/`}>Live demos</a></li>
+              <li><a href={`${base}reference/testing/`}>Browser support</a></li>
+            </ul>
+          </nav>
+          <nav aria-labelledby="col-dev">
+            <h2 id="col-dev"><b>Developer</b> deeper in</h2>
+            <ul>
+              <li><a href={`${base}components/tabs/`}>Tabs contract</a></li>
+              <li><a href={`${base}components/forms/`}>Forms contract</a></li>
+              <li><a href={`${base}reference/api/`}>Methods and events</a></li>
+              <li><a href={`${base}guides/accessibility/`}>Accessibility guide</a></li>
+              <li><a href={`${base}guides/native-html-first/`}>Native HTML first</a></li>
+              <li><a href={`${base}reference/testing/`}>Testing evidence</a></li>
+            </ul>
+          </nav>
         </div>
       </main>
       <PortalFooter />
     </div>
     <script is:inline type="module" src={library}></script>
+    <script is:inline>
+      document.querySelectorAll("[data-copy-for]").forEach((button) => {
+        if (!navigator.clipboard) return;
+        const source = document.getElementById(button.dataset.copyFor);
+        if (!source) return;
+        button.hidden = false;
+        button.addEventListener("click", async () => {
+          await navigator.clipboard.writeText(source.textContent.trim());
+          button.textContent = "COPIED";
+          setTimeout(() => { button.textContent = "COPY"; }, 1600);
+        });
+      });
+    </script>
   </body>
 </html>

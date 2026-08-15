@@ -112,6 +112,53 @@ test.describe("profiles and selection", () => {
     await expect(page.locator("#one")).toHaveAttribute("tabindex", "0");
   });
 
+  test("controls disabled by an ancestor fieldset do not suppress a panel tab stop", async ({ page }) => {
+    await loadFixture(page, progressive.replace(
+      '<section id="one" data-panel>One panel</section>',
+      '<section id="one" data-panel><fieldset disabled><input name="who" /></fieldset></section>',
+    ));
+    await expect(page.locator("#one")).toHaveAttribute("tabindex", "0");
+  });
+
+  test("hidden inputs do not suppress a panel tab stop", async ({ page }) => {
+    await loadFixture(page, progressive.replace(
+      '<section id="one" data-panel>One panel</section>',
+      '<section id="one" data-panel><input type="hidden" name="token" value="x" />Text</section>',
+    ));
+    await expect(page.locator("#one")).toHaveAttribute("tabindex", "0");
+  });
+
+  test("every negative tabindex is excluded from the focusable check", async ({ page }) => {
+    await loadFixture(page, progressive.replace(
+      '<section id="one" data-panel>One panel</section>',
+      '<section id="one" data-panel><span tabindex="-2">Skipped</span><button tabindex="-1">Skipped</button></section>',
+    ));
+    await expect(page.locator("#one")).toHaveAttribute("tabindex", "0");
+  });
+
+  test("summary and iframe count as focusable panel content", async ({ page }) => {
+    await loadFixture(page, progressive
+      .replace(
+        '<section id="one" data-panel>One panel</section>',
+        '<section id="one" data-panel><details><summary>More</summary><p>Detail</p></details></section>',
+      )
+      .replace(
+        '<section id="two" data-panel>Two panel</section>',
+        '<section id="two" data-panel><iframe title="Embedded report" src="about:blank"></iframe></section>',
+      ));
+    await expect(page.locator("#one")).not.toHaveAttribute("tabindex");
+    await expect(page.locator("#two")).not.toHaveAttribute("tabindex");
+    await expect(page.locator("#three")).toHaveAttribute("tabindex", "0");
+  });
+
+  test("a summary outside details does not suppress a panel tab stop", async ({ page }) => {
+    await loadFixture(page, progressive.replace(
+      '<section id="one" data-panel>One panel</section>',
+      '<section id="one" data-panel><summary>Stray</summary></section>',
+    ));
+    await expect(page.locator("#one")).toHaveAttribute("tabindex", "0");
+  });
+
   test("opt-in until-found panels stay findable and select on beforematch", async ({ page }) => {
     await loadFixture(page, progressive.replace(
       '<manner-tabs id="tabs">',

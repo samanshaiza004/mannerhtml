@@ -53,7 +53,9 @@ Duplicate authored IDs are rejected because they make `aria-controls` and `aria-
 
 ## Focusable panels
 
-A panel receives `tabindex="0"` only when it does not already contain a focusable descendant. This gives keyboard users a route into plain text while avoiding an extra stop before a panel’s first link or control. Authored `tabindex` values are preserved through `refresh()`.
+A panel receives `tabindex="0"` only when it does not already contain a descendant in the sequential focus order. This gives keyboard users a route into plain text while avoiding an extra stop before a panel’s first link or control. Authored `tabindex` values are preserved through `refresh()`.
+
+The check follows HTML's own rules rather than a shorthand selector. `<summary>` (the first one in a `<details>`) and `<iframe>` count; any negative `tabindex` does not, including on an element that would otherwise be focusable; and hidden inputs and controls disabled by an ancestor `<fieldset disabled>` do not. The check is structural, never style-based, so it returns the same answer for a panel that is currently hidden.
 
 ## Findable inactive content
 

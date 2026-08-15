@@ -12,7 +12,7 @@ Install the published package from npm:
 npm install mannerhtml
 ```
 
-Then import it from your application entry point. The package is dependency-free ESM and registers both elements:
+Then import it from your application entry point. The package is dependency-free ESM and registers all three elements:
 
 ```js
 import "mannerhtml";
@@ -40,7 +40,7 @@ The anchor example remains ordinary, deep-linkable HTML before JavaScript. After
 
 The default activation mode is automatic. Use `data-activation="manual"` when selection should require Enter or Space. Use `data-orientation="vertical"` for vertical arrow behavior.
 
-Use `data-hidden="until-found"` to keep inactive panel text available to find-in-page and fragment navigation in supporting browsers. Panels receive a tab stop only when they do not contain a focusable descendant.
+Use `data-hidden="until-found"` to keep inactive panel text available to find-in-page and fragment navigation in supporting browsers. Panels receive a tab stop only when they do not contain a descendant in the sequential focus order.
 
 ## Forms
 
@@ -49,6 +49,23 @@ Use `data-hidden="until-found"` to keep inactive panel text available to find-in
 See the [form validation contract](docs/form-validation-contract.md) for the required markup, API, focus policy, announcements, and grouped-control guidance.
 
 Invalid submissions dispatch `manner-form-invalid` after error presentation is synchronized. Completed native resets restore the pristine presentation; canceled resets preserve the current state.
+
+## Carousel
+
+`<manner-carousel>` adds a narrow manual item sequence to author-owned HTML. It keeps one slide visible, announces manual changes politely, and keeps focus on the native Previous or Next button.
+
+```html
+<manner-carousel aria-label="Event photographs">
+  <div data-slides>
+    <figure data-slide aria-label="Christmas service, 2025">…</figure>
+    <figure data-slide aria-label="Church picnic, 2025" hidden>…</figure>
+  </div>
+  <button type="button" data-previous>Previous</button>
+  <button type="button" data-next>Next</button>
+</manner-carousel>
+```
+
+Use `data-loop` for cyclic navigation. Carousel intentionally has no autoplay, swipe, dots, animation, or arrow-key contract. See [the Carousel contract](docs/carousel.md).
 
 ## API
 
@@ -61,7 +78,7 @@ tabs.addEventListener("manner-tabs-change", (event) => {
 });
 ```
 
-Importing `mannerhtml` registers `<manner-tabs>`. Advanced consumers can import `{ MannerTabs }` from `mannerhtml/element` and register a different custom-element name themselves.
+Importing `mannerhtml` registers `<manner-tabs>`, `<manner-form>`, and `<manner-carousel>`. Advanced consumers can import an element class from its subpath and register a different custom-element name themselves.
 
 ## What it is not
 
@@ -69,4 +86,4 @@ MannerHTML is not a component library, design system, CSS framework, rendering f
 
 ## Status
 
-MannerHTML v0.2 includes tabs and form validation. Disabled tabs, automatic mutation reconciliation, URL history synchronization, async panels, and additional widgets are intentionally out of scope. Browser and assistive-technology evidence is recorded in [TESTING.md](TESTING.md).
+MannerHTML v0.2 includes tabs, form validation, and the manual Carousel primitive. Disabled tabs, automatic mutation reconciliation, URL history synchronization, async panels, autoplay, swipe, and additional widgets are intentionally out of scope. Browser and assistive-technology evidence is recorded in [TESTING.md](TESTING.md).

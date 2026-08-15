@@ -1,41 +1,38 @@
 ---
-import PortalIcon from "./PortalIcon.astro";
-
 const base = import.meta.env.BASE_URL;
 const current = Astro.url.pathname.endsWith("/demos/") ? "demos" : "home";
-const nav = [
-  { id: "home", label: "Home", note: "overview", href: base, icon: "home" },
-  { id: "docs", label: "Docs", note: "get started", href: `${base}docs/`, icon: "docs" },
-  { id: "tabs", label: "Tabs", note: "behavior", href: `${base}components/tabs/`, icon: "tabs" },
-  { id: "forms", label: "Forms", note: "validation", href: `${base}components/forms/`, icon: "forms" },
-  { id: "demos", label: "Demos", note: "try it", href: `${base}demos/`, icon: "demos" },
-  { id: "testing", label: "Testing", note: "evidence", href: `${base}reference/testing/`, icon: "testing" },
-  { id: "github", label: "GitHub", note: "source", href: "https://github.com/samanshaiza004/mannerhtml", icon: "github" },
+const explore = [
+  { id: "docs", label: "Docs", href: `${base}docs/` },
+  { id: "tabs", label: "Tabs", href: `${base}components/tabs/` },
+  { id: "forms", label: "Forms", href: `${base}components/forms/` },
+  { id: "demos", label: "Demos", href: `${base}demos/` },
+  { id: "testing", label: "Testing", href: `${base}reference/testing/` },
+  { id: "github", label: "Source", href: "https://github.com/samanshaiza004/mannerhtml" },
 ] as const;
 ---
 
 <header class="site-header">
   <div class="masthead">
-    <a class="wordmark" href={base} aria-label="MannerHTML home">
-      <span class="code-mark" aria-hidden="true">&lt;/&gt;</span>
-      <span><strong>MannerHTML</strong><small>Accessible behavior for the HTML you already have.</small></span>
+    <a class="wordmark" href={base}>
+      <strong>MannerHTML</strong><span class="spark" aria-hidden="true">✦</span>
     </a>
     <form class="site-search" action={`${base}docs/`} role="search">
-      <label class="sr-only" for="site-query">Search MannerHTML</label>
-      <input id="site-query" name="q" type="search" placeholder="Search MannerHTML" />
+      <label for="site-query">Search:</label>
+      <input id="site-query" name="q" type="search" />
       <button type="submit">GO</button>
     </form>
-    <a class="download" href="https://github.com/samanshaiza004/mannerhtml/archive/refs/tags/v0.2.0.tar.gz">
-      <span class="package" aria-hidden="true">📦</span>
-      <span><strong>Download v0.2.0</strong><small>source archive</small></span>
-    </a>
+    <p class="masthead-links">
+      <a href="https://github.com/samanshaiza004/mannerhtml/releases">Releases</a>
+      <a href="https://github.com/samanshaiza004/mannerhtml/issues">Issues</a>
+      <b>v0.2.0</b>
+    </p>
+    <span class="masthead-cut" aria-hidden="true"></span>
   </div>
   <nav class="portal-nav" aria-label="Primary">
-    {nav.map((item) => (
-      <a href={item.href} aria-current={current === item.id ? "page" : undefined}>
-        <PortalIcon name={item.icon} />
-        <span><strong>{item.label}</strong><small>{item.note}</small></span>
-      </a>
+    <a class="nav-home" href={base} aria-current={current === "home" ? "page" : undefined}>Home</a>
+    <span class="nav-label" aria-hidden="true">Explore:</span>
+    {explore.map((item) => (
+      <a href={item.href} aria-current={current === item.id ? "page" : undefined}>{item.label}</a>
     ))}
   </nav>
 </header>

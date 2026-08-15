@@ -12,6 +12,8 @@
   --sl-color-gray-5: #dce1eb;
   --sl-color-gray-6: #f1f3f8;
   --sl-color-black: #fff;
+  --sl-content-width: 42rem;
+  --sl-sidebar-width: 14rem;
 }
 
 :root[data-theme="dark"] {
@@ -29,10 +31,7 @@
 }
 
 body {
-  background-image:
-    linear-gradient(rgb(125 139 173 / 9%) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(125 139 173 / 9%) 1px, transparent 1px);
-  background-size: 18px 18px;
+  background-image: repeating-linear-gradient(90deg, rgb(125 139 173 / 7%) 0 1px, transparent 1px 5px);
 }
 
 header.header {
@@ -46,8 +45,8 @@ header.header button {
 }
 
 .site-title img {
-  width: 14rem;
-  max-height: 2.6rem;
+  width: 12rem;
+  max-height: 2.2rem;
   padding: 0.2rem 0.55rem;
   border-radius: 4px;
   background: white;
@@ -87,14 +86,36 @@ header.header button {
   border-bottom: 3px solid var(--sl-color-accent);
 }
 
+/*
+ * Starlight ships borderless tables, so it zeroes the inline padding on the
+ * first and last cells. We draw a bordered table, which leaves that text flush
+ * against the frame — restore the padding on every cell.
+ */
 .sl-markdown-content table {
   border: 1px solid var(--sl-color-gray-4);
   box-shadow: 3px 3px 0 rgb(7 56 238 / 12%);
 }
 
+.sl-markdown-content :is(th, td) {
+  padding-inline: 0.75rem;
+}
+
+.sl-markdown-content :is(th:first-child, td:first-child),
+.sl-markdown-content :is(th:last-child, td:last-child) {
+  padding-inline: 0.75rem;
+}
+
+.sl-markdown-content :is(th, td) + :is(th, td) {
+  border-inline-start: 1px solid var(--sl-color-gray-5);
+}
+
 .sl-markdown-content th {
   color: white;
   background: linear-gradient(90deg, #001c9b, #0738ee);
+}
+
+.sl-markdown-content th + th {
+  border-inline-start-color: rgb(255 255 255 / 35%);
 }
 
 .sl-markdown-content code:not(:where(.not-content *)) {

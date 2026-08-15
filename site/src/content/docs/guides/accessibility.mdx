@@ -11,6 +11,8 @@ For tabs, the library supplies tab roles and relationships, roving focus, select
 
 For forms, it preserves native validity as the source of truth while coordinating invalid state, error descriptions, summary visibility, and focus on failed submission.
 
+For Carousel, it exposes a named group and named slides, keeps one slide visible, announces manual changes through the tested polite live-region policy, and leaves focus on the Previous or Next button. APG treats a carousel live region as optional; the polite setting is MannerHTML’s deliberate contract, not an APG mandate.
+
 ## What authors still own
 
 - A useful accessible name for every tablist.
@@ -18,10 +20,11 @@ For forms, it preserves native validity as the source of truth while coordinatin
 - Visible focus styles with sufficient contrast.
 - Error messages that explain how to recover.
 - Live-region policy and summary wording.
+- A name for the carousel and every slide, plus unique IDs for `aria-labelledby` references.
 - Product-level keyboard and assistive-technology testing.
 
 ## Automated checks are a floor
 
 The repository runs axe and ARIA snapshots in Chromium, Firefox, and WebKit. Those checks catch many structural regressions but cannot establish a good screen-reader experience.
 
-The release gate also calls for Safari with VoiceOver, Firefox with NVDA, and Chrome with NVDA. These manual combinations remain unverified until a person records the results. See [testing evidence](../../reference/testing/) for the current matrix.
+The release gate also calls for Safari with VoiceOver, Firefox with NVDA, and Chrome with NVDA. Carousel is not complete until those combinations verify understandable slide announcements while focus remains on the navigation control. See [testing evidence](../../reference/testing/) for the current matrix.

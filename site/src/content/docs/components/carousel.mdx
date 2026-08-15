@@ -1,0 +1,76 @@
+---
+title: Carousel
+description: A narrow manual item sequence with stable focus and polite slide announcements.
+---
+
+`<manner-carousel>` adds the missing sequence behavior to author-owned HTML. It shows one item at a time, uses native Previous and Next buttons, and announces the newly displayed item through a polite live region.
+
+## Markup
+
+```html
+<manner-carousel aria-label="Event photographs">
+  <div data-slides>
+    <figure data-slide aria-label="Christmas service, 2025">
+      <img src="christmas.jpg" alt="The choir at the Christmas service">
+    </figure>
+    <figure data-slide aria-label="Church picnic, 2025" hidden>
+      <img src="picnic.jpg" alt="People gathered at the church picnic">
+    </figure>
+  </div>
+
+  <button type="button" data-previous>Previous</button>
+  <button type="button" data-next>Next</button>
+</manner-carousel>
+```
+
+The carousel and every slide need `aria-label` or `aria-labelledby`. Keep the referenced IDs unique. Controls must be named native `<button type="button">` elements; links are not a meaningful Previous/Next fallback because their destinations change with state.
+
+MannerHTML adds the carousel and slide group semantics, `aria-live="polite"` on `[data-slides]`, and `hidden` to inactive slides. The polite live-region setting is MannerHTML’s tested policy for manual sequences. APG treats a slide live region as optional; it does not mandate this exact setting.
+
+## Navigation
+
+The default sequence is finite. Previous and Next remain focusable, receive `aria-disabled="true"` at their respective boundaries, and do nothing there. Selection never moves keyboard focus away from the activated navigation button.
+
+Use `data-loop` for an intentionally cyclic sequence:
+
+```html
+<manner-carousel aria-label="Product images" data-loop>…</manner-carousel>
+```
+
+Manner Carousel does not add arrow keys, autoplay, timers, pause controls, animation, swipe, dots, multi-item views, or virtualization.
+
+## API
+
+```js
+const carousel = document.querySelector("manner-carousel");
+
+carousel.selectedIndex = 1;
+carousel.select(0);
+carousel.next();
+carousel.previous();
+carousel.refresh();
+
+carousel.addEventListener("manner-carousel-change", (event) => {
+  const { index, slide, source } = event.detail;
+  // source: "programmatic" | "next" | "previous"
+});
+```
+
+The source describes the action, not whether it came from a pointer or keyboard. Selecting the current item and finite boundary no-ops do not dispatch a change event.
+
+## Initial state and refresh
+
+One visible slide is adopted. If every slide is hidden, the first is selected. Multiple visible slides are invalid. After deliberate structural changes, call `refresh()`; it preserves the selected element when possible, otherwise applies the same visibility rules.
+
+## Dialogs
+
+Compose Carousel with native `<dialog>` when a gallery needs modality. The dialog owns opening, closing, and focus restoration; Carousel owns only sequence selection and announcements.
+
+```html
+<dialog id="gallery-dialog">
+  <manner-carousel aria-label="Event photographs">…</manner-carousel>
+  <button commandfor="gallery-dialog" command="close">Close</button>
+</dialog>
+```
+
+Try the [live demo](/demos/) and read the [full Carousel contract](/docs/carousel/).

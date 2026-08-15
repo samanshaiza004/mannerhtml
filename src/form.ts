@@ -1,3 +1,13 @@
+import {
+  BootstrapController,
+  addIdReferences,
+  describe,
+  discoverOwned,
+  duplicateIdError,
+  ownedBy,
+  reportError,
+} from "./shared.js";
+
 type FormControl = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | HTMLButtonElement;
 
 interface FormModel {
@@ -22,29 +32,6 @@ const HTMLElementBase: typeof HTMLElement =
   (globalThis as { HTMLElement?: typeof HTMLElement }).HTMLElement ??
   (class {} as typeof HTMLElement);
 
-function describe(host: HTMLElement): string {
-  return `<${host.localName || "manner-form"}>`;
-}
-
-function error(host: HTMLElement, message: string): void {
-  console.error(`${describe(host)}: ${message}`, host);
-}
-
-function ownedBy(host: HTMLElement, element: Element): boolean {
-  let current: Element | null = element;
-  while (current) {
-    if (current === host) return true;
-    const registered = globalThis.customElements?.get(current.localName);
-    if (
-      current instanceof MannerForm ||
-      registered === MannerForm ||
-      (registered && registered.prototype instanceof MannerForm)
-    ) return false;
-    current = current.parentElement;
-  }
-  return false;
-}
-
 function isFormControl(element: Element): element is FormControl {
   return (
     (element.localName === "input" ||
@@ -58,9 +45,7 @@ function isFormControl(element: Element): element is FormControl {
 
 export class MannerForm extends HTMLElementBase {
   #initialized = false;
-  #bootObserver: MutationObserver | null = null;
-  #bootTimer: ReturnType<typeof setTimeout> | null = null;
-  #bootController: AbortController | null = null;
+  #bootstrap = new BootstrapController();
   #abortController: AbortController | null = null;
   #form!: HTMLFormElement;
   #controls: FormControl[] = [];
@@ -81,24 +66,11 @@ export class MannerForm extends HTMLElementBase {
     }
     const result = this.#tryUpgrade();
     if (result.state !== "pending") return;
-    this.#bootObserver?.disconnect();
-    this.#bootController?.abort();
-    const controller = new AbortController();
-    this.#bootController = controller;
-    this.#bootObserver = new MutationObserver(() => this.#tryUpgrade());
-    this.#bootObserver.observe(this, { childList: true, subtree: true });
-    this.#bootTimer = setTimeout(() => {
-      this.#bootTimer = null;
-      this.#tryUpgrade(this.ownerDocument?.readyState !== "loading");
-    }, 0);
-    this.ownerDocument?.addEventListener("DOMContentLoaded", this.#onDOMContentLoaded, {
-      once: true,
-      signal: controller.signal,
-    });
+    this.#bootstrap.start(this, (finalize) => this.#tryUpgrade(finalize));
   }
 
   disconnectedCallback(): void {
-    this.#stopBootstrap();
+    this.#bootstrap.stop();
     this.#abortController?.abort();
     this.#abortController = null;
     if (this.#form) this.#form.noValidate = this.#originalNoValidate;
@@ -110,43 +82,26 @@ export class MannerForm extends HTMLElementBase {
   }
 
   validate(): boolean {
-    if (!this.#form) throw new Error(`${describe(this)} is not upgraded`);
+    if (!this.#form) throw new Error(`${describe(this, "manner-form")} is not upgraded`);
     const valid = this.#form.checkValidity();
     this.#syncAll();
     return valid;
   }
 
-  #onDOMContentLoaded = (): void => {
-    this.#tryUpgrade(true);
-  };
-
   #tryUpgrade(finalize = false): ModelResult {
     const result = this.#buildModel(finalize);
     if (result.state === "valid") this.#commit(result.model);
-    else if (result.state === "invalid") this.#stopBootstrap();
+    else if (result.state === "invalid") this.#bootstrap.stop();
     return result;
   }
 
-  #stopBootstrap(): void {
-    this.#bootObserver?.disconnect();
-    this.#bootObserver = null;
-    if (this.#bootTimer !== null) clearTimeout(this.#bootTimer);
-    this.#bootTimer = null;
-    this.#bootController?.abort();
-    this.#bootController = null;
-  }
-
-  #discover<T extends Element>(selector: string): T[] {
-    return [...this.querySelectorAll<T>(selector)].filter((element) => ownedBy(this, element));
-  }
-
   #buildModel(finalize: boolean): ModelResult {
-    const forms = this.#discover<HTMLFormElement>("form");
-    const summaries = this.#discover<HTMLElement>("[data-error-summary]");
-    const errors = this.#discover<HTMLElement>("[data-error-for]");
-    const summaryItems = this.#discover<HTMLElement>("[data-summary-for]");
+    const forms = discoverOwned<HTMLFormElement>(this, "form", MannerForm);
+    const summaries = discoverOwned<HTMLElement>(this, "[data-error-summary]", MannerForm);
+    const errors = discoverOwned<HTMLElement>(this, "[data-error-for]", MannerForm);
+    const summaryItems = discoverOwned<HTMLElement>(this, "[data-summary-for]", MannerForm);
     const invalid = (message: string): ModelResult => {
-      error(this, message);
+      reportError(this, "manner-form", message);
       return { state: "invalid" };
     };
     if (!finalize && (this.ownerDocument?.readyState === "loading" || forms.length === 0)) {
@@ -156,8 +111,9 @@ export class MannerForm extends HTMLElementBase {
     const form = forms[0];
     const controls = [...form.elements]
       .filter((element): element is FormControl => isFormControl(element))
-      .filter((element) => element.form === form && ownedBy(this, element));
-    const fieldsets = this.#discover<HTMLFieldSetElement>("fieldset").filter((fieldset) => fieldset.form === form);
+      .filter((element) => element.form === form && ownedBy(this, element, MannerForm));
+    const fieldsets = discoverOwned<HTMLFieldSetElement>(this, "fieldset", MannerForm)
+      .filter((fieldset) => fieldset.form === form);
     const focusMode = this.getAttribute("data-error-focus") || "first";
     if (focusMode !== "first") return invalid(`Unsupported data-error-focus value "${focusMode}".`);
     for (const control of controls) {
@@ -191,24 +147,17 @@ export class MannerForm extends HTMLElementBase {
     }
     const relevantIds = new Set<string>();
     for (const control of controls) {
-      if (control.id) relevantIds.add(control.id);
-      for (const id of (control.getAttribute("aria-describedby") || "").split(/\s+/).filter(Boolean)) {
-        relevantIds.add(id);
-      }
+      addIdReferences(relevantIds, control, ["aria-describedby"]);
     }
     for (const fieldset of fieldsets) if (fieldset.id) relevantIds.add(fieldset.id);
     for (const node of errors) relevantIds.add(node.id);
-    const documentIds = [...(this.ownerDocument?.querySelectorAll<HTMLElement>("[id]") || [])];
-    for (const id of relevantIds) {
-      if (documentIds.filter((element) => element.id === id).length > 1) {
-        return invalid(`Duplicate authored id "${id}" would make an error relationship ambiguous.`);
-      }
-    }
+    const duplicateError = duplicateIdError(this.ownerDocument, relevantIds);
+    if (duplicateError) return invalid(duplicateError);
     return { state: "valid", model: { form, controls, fieldsets, summaries, errors, summaryItems } };
   }
 
   #commit(model: FormModel): void {
-    this.#stopBootstrap();
+    this.#bootstrap.stop();
     const formChanged = this.#form !== model.form;
     if (formChanged && this.#form) {
       this.#abortController?.abort();
