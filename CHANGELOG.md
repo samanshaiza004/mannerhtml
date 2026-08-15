@@ -14,6 +14,7 @@
 ### Improved
 
 - Runtime diagnostics no longer name a library version; the disabled-tab error reads `Disabled tabs are not supported.`
+- Added the symmetric `mannerhtml/tabs` entry point and marked the legacy `mannerhtml/element` tabs-only alias as deprecated. The explicit `mannerhtml/register` entry point remains supported.
 
 ## 0.2.0 — 2026-08-13
 

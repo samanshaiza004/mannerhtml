@@ -3,7 +3,11 @@ title: Carousel
 description: A narrow manual item sequence with stable focus and polite slide announcements.
 ---
 
+import CarouselDemo from '../../../components/CarouselDemo.astro';
+
 `<manner-carousel>` adds the missing sequence behavior to author-owned HTML. It shows one item at a time, uses native Previous and Next buttons, and announces the newly displayed item through a polite live region.
+
+<CarouselDemo />
 
 ## Markup
 
@@ -29,7 +33,7 @@ MannerHTML adds the carousel and slide group semantics, `aria-live="polite"` on 
 
 ## Navigation
 
-The default sequence is finite. Previous and Next remain focusable, receive `aria-disabled="true"` at their respective boundaries, and do nothing there. Selection never moves keyboard focus away from the activated navigation button.
+The default sequence is finite. Use `data-loop` only when a cyclic sequence is genuinely appropriate.
 
 Use `data-loop` for an intentionally cyclic sequence:
 
@@ -38,6 +42,14 @@ Use `data-loop` for an intentionally cyclic sequence:
 ```
 
 Manner Carousel does not add arrow keys, autoplay, timers, pause controls, animation, swipe, dots, multi-item views, or virtualization.
+
+## Selection and focus
+
+Previous and Next keep focus on the activated button. They do not focus the new slide, its contents, or another control. This makes repeated browsing predictable and avoids hiding the user’s focused navigation control.
+
+The default sequence is finite. At the first slide, Previous has `aria-disabled="true"`; at the last slide, Next has it. The native `disabled` attribute is not used, so the controls remain focusable. MannerHTML suppresses boundary activation.
+
+There is no arrow-key contract. Native button keyboard behavior remains available, while applications that need lightbox arrow shortcuts can add them around this primitive after testing their content.
 
 ## API
 
@@ -58,9 +70,24 @@ carousel.addEventListener("manner-carousel-change", (event) => {
 
 The source describes the action, not whether it came from a pointer or keyboard. Selecting the current item and finite boundary no-ops do not dispatch a change event.
 
+`select()` throws `RangeError` for a non-integer or out-of-range index. The event source describes the action, not the input modality: `select(2)` reports `programmatic`, `next()` reports `next`, and `previous()` reports `previous`.
+
 ## Initial state and refresh
 
 One visible slide is adopted. If every slide is hidden, the first is selected. Multiple visible slides are invalid. After deliberate structural changes, call `refresh()`; it preserves the selected element when possible, otherwise applies the same visibility rules.
+
+Refresh resolves selection in this order:
+
+1. Preserve the selected slide if that element is still owned.
+2. Adopt exactly one visible slide.
+3. If none are visible, select the first slide.
+4. If multiple slides are visible, leave the current enhancement untouched and report an invalid model.
+
+Nested `<manner-carousel>` instances and subclasses registered under custom names are isolated from one another.
+
+## Deliberate non-features
+
+The first Carousel release has no autoplay, timers, pause button, animation engine, swipe handling, dot navigation, multi-item viewport, or virtualized slides. These features introduce different accessibility and focus contracts and do not belong in this manual primitive.
 
 ## Dialogs
 
@@ -73,4 +100,4 @@ Compose Carousel with native `<dialog>` when a gallery needs modality. The dialo
 </dialog>
 ```
 
-Try the [live demo](/demos/) and read the [full Carousel contract](/docs/carousel/).
+Try the [full-page live demo](../../demos/#carousel-demo) or [read the contract source on GitHub](https://github.com/samanshaiza004/mannerhtml/blob/main/docs/carousel.md).

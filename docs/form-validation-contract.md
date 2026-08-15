@@ -93,6 +93,24 @@ form.addEventListener("submit", async (event) => {
 });
 ```
 
+## Submit interceptors and `noValidate`
+
+After upgrade, MannerHTML sets `form.noValidate = true` so the browser does not open its own validation UI or silently block the submit before MannerHTML can synchronize the authored errors. The form remains validated with `checkValidity()` and `ValidityState`.
+
+This matters when another library intercepts submission and uses the live `form.noValidate` property as its own validation gate. For example, htmx skips its validation pipeline when `noValidate` is true unless the form explicitly opts in. Add `hx-validate="true"` to an htmx form inside `<manner-form>`:
+
+```html
+<manner-form>
+  <form hx-post="/contact" hx-target="#result" hx-validate="true">
+    <label for="message">Message</label>
+    <textarea id="message" name="message" required></textarea>
+    <button type="submit">Send</button>
+  </form>
+</manner-form>
+```
+
+Other submit interceptors, including Turbo, Unpoly, or hand-written AJAX handlers, need their equivalent explicit validation opt-in when they provide one. Otherwise call `form.checkValidity()` before sending. Do not remove MannerHTML's `noValidate` assignment to restore a second native validation gate; that can prevent MannerHTML's submit coordination from running or produce competing error presentation.
+
 `manner-form-invalid` bubbles from the custom element when MannerHTML blocks an invalid submit. Its `event.detail.controls` array contains the invalid, constraint-validatable controls after presentation has been synchronized. Listen for it when a custom submission flow needs an explicit hook for announcements or scrolling. If JavaScript sets custom validity, update it in capture-phase `input`, `change`, or `submit` listeners so it is current before MannerHTML reads `ValidityState`:
 
 ```js

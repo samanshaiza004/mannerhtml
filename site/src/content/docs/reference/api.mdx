@@ -8,13 +8,15 @@ description: Package entry points, attributes, methods, properties, and events.
 ```js
 import "mannerhtml"; // registers all custom elements
 import { MannerTabs, MannerForm, MannerCarousel } from "mannerhtml";
-import { MannerTabs } from "mannerhtml/element";
+import { MannerTabs } from "mannerhtml/tabs";
 import { MannerForm } from "mannerhtml/form";
 import { MannerCarousel } from "mannerhtml/carousel";
 import { register } from "mannerhtml/register";
 ```
 
 Importing the package is safe in server environments where `HTMLElement` and `customElements` do not exist. Registration occurs when the browser APIs are available.
+
+The element-specific entry points are `mannerhtml/tabs`, `mannerhtml/form`, and `mannerhtml/carousel`. `mannerhtml/element` is a deprecated, tabs-only compatibility alias. `mannerhtml/register` remains available for an explicit registration call; importing the package root already registers all three elements.
 
 ## `<manner-tabs>`
 
@@ -120,7 +122,7 @@ The event bubbles after a real selection change. Initial normalization and finit
 Subclass the exported class before registering a custom tag name. Ownership discovery recognizes subclasses, so nested custom-name instances remain isolated.
 
 ```js
-import { MannerTabs } from "mannerhtml/element";
+import { MannerTabs } from "mannerhtml/tabs";
 
 class ProductTabs extends MannerTabs {}
 customElements.define("product-tabs", ProductTabs);

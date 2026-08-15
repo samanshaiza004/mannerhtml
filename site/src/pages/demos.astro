@@ -12,7 +12,7 @@ const library = `${base}dist/index.js`;
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
-    <meta name="description" content="Try MannerHTML tabs and form validation in live, keyboard-operable demos." />
+    <meta name="description" content="Try MannerHTML tabs, forms, and manual carousel behavior in live, keyboard-operable demos." />
     <link rel="icon" href={`${base}favicon.svg`} />
     <title>Live demos — MannerHTML</title>
   </head>
@@ -60,7 +60,7 @@ const library = `${base}dist/index.js`;
             <p class="keyboard-hint">Try ← → Home End</p>
           </section>
 
-          <section class="demo-panel carousel-demo-panel">
+          <section id="carousel-demo" class="demo-panel carousel-demo-panel">
             <h2>Manual item sequence</h2>
             <p>Previous and Next change the visible item while focus stays on the button. The finite boundary is intentional.</p>
             <manner-carousel class="demo-carousel" aria-label="Field notes">

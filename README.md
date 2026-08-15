@@ -78,7 +78,7 @@ tabs.addEventListener("manner-tabs-change", (event) => {
 });
 ```
 
-Importing `mannerhtml` registers `<manner-tabs>`, `<manner-form>`, and `<manner-carousel>`. Advanced consumers can import an element class from its subpath and register a different custom-element name themselves.
+Importing `mannerhtml` registers `<manner-tabs>`, `<manner-form>`, and `<manner-carousel>`. Advanced consumers can import an element class from `mannerhtml/tabs`, `mannerhtml/form`, or `mannerhtml/carousel` and register a different custom-element name themselves. `mannerhtml/element` remains as a deprecated, tabs-only compatibility alias; use `mannerhtml/tabs` for new code. `mannerhtml/register` remains available when an application wants an explicit registration entry point, although the package root already registers everything.
 
 ## What it is not
 

@@ -20,7 +20,7 @@ export default defineConfig({
       },
       customCss: ["./src/styles/starlight.css"],
       editLink: {
-        baseUrl: "https://github.com/samanshaiza004/mannerhtml/edit/main/site/src/content/docs/",
+        baseUrl: "https://github.com/samanshaiza004/mannerhtml/edit/main/site/",
       },
       social: [
         {
